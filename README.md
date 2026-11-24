@@ -11,6 +11,10 @@ It is designed desktop-first, for dense screens where you want everything visibl
 > **Unofficial.** This project is not affiliated with or endorsed by the OBS Project.
 > "OBS" and "OBS Studio" are trademarks of the OBS Project.
 
+![OBS Web Controller: Scenes panel with live preview on the left, Sources tables for the live scene on the right](docs/images/main.png)
+
+<sub>Screenshots use invented demo content.</sub>
+
 ---
 
 ## Contents
@@ -147,6 +151,8 @@ pages can't reach OBS without extra setup).
 
 The first screen is your list of **saved connections**.
 
+<img src="docs/images/connections.png" alt="Saved connections screen with Edit, Delete and Connect buttons" width="560">
+
 - **+ New** opens a form: name, OBS PC address, port, password.
   - **Save password in this browser**: tick to connect with one click; untick to be asked for
     the password each time (recommended on shared computers).
@@ -213,6 +219,8 @@ their contents indented underneath.
 
 Opens under the item; several can be open at once. Fields:
 
+<img src="docs/images/transform.png" alt="Scene items with order buttons, and the transform editor open for Chat Overlay" width="540">
+
 - **Position** X / Y (pixels)
 - **Rotation** (degrees)
 - **Size** W / H (pixels). If the item uses a bounding box in OBS, this edits the **Bounds** box
@@ -224,6 +232,8 @@ Open editors update live if you move the item in OBS.
 #### Adding sources
 
 Click **+** on a scene header.
+
+<img src="docs/images/add-source.png" alt="Add source form creating a new Browser source in the Interview scene" width="450">
 
 - **New source**: choose the type, accept or change the suggested name (names must be unique
   across all sources and scenes; clashes are flagged), and fill in the main setting:
@@ -269,6 +279,8 @@ undone over obs-websocket.
 A red edge and **LIVE** badge mark sources that are actually visible on air right now.
 
 #### Tables
+
+![Sources tables for all sources, with an unapplied (amber) URL edit and the slideshow file list open](docs/images/sources.png)
 
 | Table | Columns |
 |---|---|
@@ -359,7 +371,9 @@ Clearing the browser's site data removes everything.
 - Studio Mode (Preview/Program) isn't supported; *Go live* switches Program directly.
 - Editors exist for Browser, Media, Image, Image Slideshow and Text sources. Other types can be
   viewed (raw settings), added as existing sources and deleted, but not edited.
-- Desktop-first layout; phones are not a target yet.
+- Desktop-first layout; phones are not a target yet. Below roughly 1,200 px of window width,
+  the right-hand columns of the Sources tables and the transform crop fields can be pushed out
+  of view.
 
 ---
 
