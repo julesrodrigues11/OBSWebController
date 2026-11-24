@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react'
 import { useConnection } from '../../store/connection'
 import { itemKey, useScenes, type SceneItem } from '../../store/scenes'
 import { kindLabel } from '../../obs/kinds'
-import { ChevronIcon, EyeIcon, EyeOffIcon, ListIcon, LockIcon, PlusIcon, TransformIcon, TrashIcon } from '../../components/icons'
+import { ChevronIcon, EyeIcon, EyeOffIcon, ListIcon, LockIcon, PencilIcon, PlusIcon, TransformIcon, TrashIcon } from '../../components/icons'
+import { NewScene } from './NewScene'
+import { RenameField } from './RenameField'
 import { AddSource } from './AddSource'
 import { ConfirmStrip } from '../../components/ConfirmStrip'
 import { useInputs } from '../../store/inputs'
@@ -64,6 +66,22 @@ export function ScenesPanel() {
   const moveItem = useScenes((s) => s.moveItem)
   /** Scene whose "add source" form is open. */
   const [adding, setAdding] = useState<string | null>(null)
+  const [creatingScene, setCreatingScene] = useState(false)
+  /** Scene whose name is being edited. */
+  const [renaming, setRenaming] = useState<string | null>(null)
+
+  function finishRename(oldName: string, newName: string | null) {
+    setRenaming(null)
+    if (!newName) return
+    // Carry the collapsed state over to the new name.
+    if (collapsed.has(oldName)) {
+      const next = new Set(collapsed)
+      next.delete(oldName)
+      next.add(newName)
+      setCollapsed(next)
+      saveCollapsed(next)
+    }
+  }
   const deleteInput = useInputs((s) => s.deleteInput)
   const scope = useUi((s) => s.scope)
   const setScope = useUi((s) => s.setScope)
@@ -115,14 +133,24 @@ export function ScenesPanel() {
         <input
           className="filter"
           type="search"
-          placeholder="Filter scenes and sources…"
+          placeholder="Filter…"
+          title="Filter scenes and sources by name or type (Esc clears)"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           onKeyDown={(e) => e.key === 'Escape' && setFilter('')}
         />
         <button className="button--small" onClick={() => setAll(false)} title="Expand all">Expand</button>
         <button className="button--small" onClick={() => setAll(true)} title="Collapse all">Collapse</button>
+        <button
+          className={`button--small ${creatingScene ? 'is-active' : ''}`}
+          onClick={() => setCreatingScene(!creatingScene)}
+          title="Create a new empty scene"
+        >
+          + Scene
+        </button>
       </div>
+
+      {creatingScene && <NewScene onClose={() => setCreatingScene(false)} />}
 
       <ProgramPreview />
 
@@ -146,10 +174,30 @@ export function ScenesPanel() {
         return (
           <div key={scene.sceneUuid} className={`scene ${live ? 'is-live' : ''}`}>
             <div className="scene__head">
-              <button className="scene__toggle" onClick={() => toggleCollapsed(scene.sceneName)} aria-expanded={open}>
-                <ChevronIcon open={open} />
-                <span className="scene__name">{scene.sceneName}</span>
-                <span className="muted scene__count">{(items[scene.sceneName] ?? []).length}</span>
+              {renaming === scene.sceneName ? (
+                <div className="scene__toggle scene__toggle--editing">
+                  <ChevronIcon open={open} />
+                  <RenameField name={scene.sceneName} onDone={(n) => finishRename(scene.sceneName, n)} />
+                </div>
+              ) : (
+                <button
+                  className="scene__toggle"
+                  onClick={() => toggleCollapsed(scene.sceneName)}
+                  onDoubleClick={(e) => { e.preventDefault(); setRenaming(scene.sceneName) }}
+                  aria-expanded={open}
+                  title="Click to collapse/expand · double-click to rename"
+                >
+                  <ChevronIcon open={open} />
+                  <span className="scene__name">{scene.sceneName}</span>
+                  <span className="muted scene__count">{(items[scene.sceneName] ?? []).length}</span>
+                </button>
+              )}
+              <button
+                className={`icon-button ${renaming === scene.sceneName ? 'is-active' : 'is-off'}`}
+                onClick={() => setRenaming(renaming === scene.sceneName ? null : scene.sceneName)}
+                title="Rename this scene"
+              >
+                <PencilIcon />
               </button>
               <button
                 className={`icon-button ${adding === scene.sceneName ? 'is-active' : 'is-off'}`}

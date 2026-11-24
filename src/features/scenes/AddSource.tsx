@@ -5,6 +5,7 @@ import { kindLabel } from '../../obs/kinds'
 import { useConnection } from '../../store/connection'
 import { useInputs, type Category, type Settings } from '../../store/inputs'
 import { useScenes } from '../../store/scenes'
+import { uniqueName, useTakenNames } from '../../store/names'
 
 const TYPES: { category: Category; title: string; field: string; placeholder: string }[] = [
   { category: 'browser', title: 'Browser', field: 'URL', placeholder: 'https://…' },
@@ -14,12 +15,6 @@ const TYPES: { category: Category; title: string; field: string; placeholder: st
   { category: 'text', title: 'Text', field: 'Text', placeholder: 'Your text' },
 ]
 
-/** First "Title", "Title 2", "Title 3"… not already used by a source, scene or group. */
-function uniqueName(base: string, taken: Set<string>) {
-  if (!taken.has(base)) return base
-  for (let n = 2; ; n++) if (!taken.has(`${base} ${n}`)) return `${base} ${n}`
-}
-
 /** Inline form under a scene header: create a new source, or add an existing one. */
 export function AddSource({ sceneName, onClose }: { sceneName: string; onClose: () => void }) {
   const live = useConnection((s) => s.programScene === sceneName)
@@ -27,7 +22,6 @@ export function AddSource({ sceneName, onClose }: { sceneName: string; onClose: 
   const inputs = useInputs((s) => s.inputs)
   const createInput = useInputs((s) => s.createInput)
   const items = useScenes((s) => s.items)
-  const groups = useScenes((s) => s.groups)
   const addExisting = useScenes((s) => s.addExisting)
 
   const [tab, setTab] = useState<'new' | 'existing'>('new')
@@ -36,11 +30,7 @@ export function AddSource({ sceneName, onClose }: { sceneName: string; onClose: 
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  // OBS names must be unique across all sources, scenes and groups.
-  const taken = useMemo(
-    () => new Set([...inputs.map((i) => i.name), ...scenes.map((s) => s.sceneName), ...groups]),
-    [inputs, scenes, groups],
-  )
+  const taken = useTakenNames()
 
   // ---- new source
   const [category, setCategory] = useState<Category>('browser')

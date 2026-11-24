@@ -262,3 +262,18 @@ button.slides__summary:hover { border-color: #7c9cff; color: var(--text); }
 }
 .order-button:hover:not(:disabled) { border-color: var(--border); }
 .order-button:disabled { opacity: 0.3; }
+
+/* ---------- new / rename scene ---------- */
+.scenes .panel__head .filter { width: auto; flex: 1; min-width: 80px; }
+.button--small.is-active { border-color: #7c9cff; color: #7c9cff; }
+.newscene {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; padding: 8px 10px;
+  border: 1px solid #7c9cff55; border-radius: 6px; background: #7c9cff0d;
+}
+.newscene .field { flex: 1; min-width: 120px; }
+.newscene__label { color: var(--muted); font-size: 0.8rem; }
+.newscene__error { flex-basis: 100%; font-size: 0.85rem; }
+.scene__toggle--editing { cursor: default; }
+.rename { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.rename__input { padding: 2px 6px; font-weight: 600; }
+.rename__error { font-size: 0.78rem; font-weight: 400; }

@@ -67,6 +67,10 @@ Status: decisions agreed in discussion so far. Open questions at the end.
     Uses the newest kind ID the OBS offers (e.g. slideshow_v2, text_gdiplus_v3).
   - Existing source: searchable list of sources and other scenes; marks ones already in it.
   - "Start hidden" is ticked by default when the scene is live. New items go on top (OBS default).
+- Scenes (built): "+ Scene" in the panel header creates an empty scene (unique-name check,
+  suggested "Scene N"); rename via pencil on the header or double-clicking the name (Enter or
+  blur applies, Escape cancels, duplicates blocked; blur with an invalid name cancels). Collapsed
+  state and the Sources scope follow a rename. No reorder/duplicate (not in obs-websocket).
 - Ordering (built): per item ⤒ ▲ ▼ ⤓ (top, up, down, bottom), also inside groups; buttons
   fade in on hover. Top of the list = drawn above everything else.
 - Program preview (built): collapsible snapshot of the live scene at the top of the Scenes

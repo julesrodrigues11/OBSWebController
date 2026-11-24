@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { obs, errorText } from '../obs/client'
 import { useConnection } from './connection'
 import type { Transform } from '../obs/transform'
+import { useUi } from './ui'
 
 /** A scene item. Visibility and lock belong to the item (per scene), not to the source. */
 export interface SceneItem {
@@ -33,6 +34,10 @@ interface ScenesState {
   removeItem: (container: string, itemId: number) => Promise<void>
   /** Delete a whole scene. No undo. */
   deleteScene: (sceneName: string) => Promise<void>
+  /** Create an empty scene. Resolves to an error message, or null on success. */
+  createScene: (sceneName: string) => Promise<string | null>
+  /** Rename a scene. Resolves to an error message, or null on success. */
+  renameScene: (oldName: string, newName: string) => Promise<string | null>
   /** Change stacking order. 'up' = towards the top of the list (drawn above more items). */
   moveItem: (container: string, itemId: number, to: 'up' | 'down' | 'top' | 'bottom') => Promise<void>
   /** Add an existing source to a scene. Resolves to an error message, or null on success. */
@@ -218,6 +223,27 @@ export const useScenes = create<ScenesState>()((set, get) => {
       try {
         await obs.call('CreateSceneItem', { sceneName, sourceName, sceneItemEnabled: enabled })
         return null // list refreshes via SceneItemCreated
+      } catch (e) {
+        return errorText(e)
+      }
+    },
+
+    createScene: async (sceneName) => {
+      try {
+        await obs.call('CreateScene', { sceneName })
+        return null // scene list refreshes via SceneListChanged
+      } catch (e) {
+        return errorText(e)
+      }
+    },
+
+    renameScene: async (oldName, newName) => {
+      try {
+        await obs.call('SetSceneName', { sceneName: oldName, newSceneName: newName })
+        // Keep the Sources panel on this scene if it was showing it.
+        const { scope, setScope } = useUi.getState()
+        if (scope.mode === 'scene' && scope.scene === oldName) setScope({ mode: 'scene', scene: newName })
+        return null // lists refresh via SceneNameChanged
       } catch (e) {
         return errorText(e)
       }

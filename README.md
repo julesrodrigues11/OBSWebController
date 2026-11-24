@@ -15,10 +15,28 @@ It is designed desktop-first, for dense screens where you want everything visibl
 
 <sub>Screenshots use invented demo content.</sub>
 
+## What it is (and isn't) for
+
+OBS Web Controller is meant to **augment** OBS during a live session: the quick, frequent
+changes you'd otherwise have to make by reaching over to the OBS machine and clicking through
+property windows, such as switching scenes, showing or hiding sources, swapping a URL, file or
+caption, nudging a position, or adding a source on the fly.
+
+It is **not a replacement for OBS**. More specialist work is still done in OBS itself, including:
+
+- **Audio**: there are currently no audio controls (volume, mute, monitoring, audio tracks,
+  sync offset) for any source
+- Filters and effects
+- Starting/stopping streaming, recording or the virtual camera
+- Transitions, Studio Mode, profiles, scene collections and OBS settings
+- Reordering or duplicating scenes
+- Editing source types other than Browser, Media, Image, Image Slideshow and Text
+
 ---
 
 ## Contents
 
+- [What it is (and isn't) for](#what-it-is-and-isnt-for)
 - [Features](#features)
 - [How it works](#how-it-works)
 - [Requirements](#requirements)
@@ -48,6 +66,7 @@ It is designed desktop-first, for dense screens where you want everything visibl
 - Inline **transform editor**: position, rotation, size (or bounding box), crop, with aspect lock
 - **Add sources** to a scene: create a new Browser, Media, Image, Image Slideshow or Text source,
   or add an existing source or scene
+- **Create** new scenes and **rename** scenes
 - **Delete** items, sources and scenes, with a confirmation step
 - Collapsible, low-rate **preview** of the live scene
 
@@ -187,7 +206,8 @@ Each scene is a collapsible box. The header shows:
 
 | Control | What it does |
 |---|---|
-| ▸ name, count | Collapse or expand the scene (remembered) |
+| ▸ name, count | Collapse or expand the scene (remembered). Double-click the name to rename it |
+| pencil | Rename the scene |
 | **+** | Add a source to this scene ([see below](#adding-sources)) |
 | list icon | Show only this scene's sources in the Sources panel |
 | bin | Delete the scene (with confirmation) |
@@ -195,6 +215,19 @@ Each scene is a collapsible box. The header shows:
 
 Use **Expand** / **Collapse** at the top to open or close all scenes, and the filter box to find
 scenes and sources by name or type (e.g. `browser`). Escape clears the filter.
+
+#### Creating and renaming scenes
+
+- **+ Scene** (top of the panel) opens a small form with a suggested name such as *Scene 2*.
+  Change it if you like and press **Create** (or Enter). The new, empty scene appears in the
+  list; add sources to it with its **+** button. Escape or **Cancel** closes the form.
+- **Rename** with the pencil on a scene header, or by double-clicking the scene's name. The name
+  becomes a field: **Enter** or clicking away renames, **Escape** cancels.
+
+Names must be unique across all scenes and sources: a name that's already used is flagged and
+can't be applied (clicking away with such a name cancels the rename). Renaming the live scene is
+fine; it stays live. The scene's collapsed state, and the Sources panel if it's showing that
+scene, follow the new name. Scenes nested inside other scenes are renamed there too.
 
 #### Items
 
@@ -362,6 +395,8 @@ Clearing the browser's site data removes everything.
 
 ## Limitations
 
+- No audio controls, filters, stream/record controls or OBS settings: use OBS itself for these
+  (see [What it is (and isn't) for](#what-it-is-and-isnt-for)).
 - Only one operator at a time is assumed. Two people editing the same field: last change wins.
 - It can't browse files on the OBS PC (obs-websocket has no file access), so paths are typed or
   pasted. It also can't list the images inside a slideshow folder.
@@ -369,6 +404,8 @@ Clearing the browser's site data removes everything.
   edit fail with an error rather than apply to the wrong source.
 - No undo: deletions are permanent.
 - Studio Mode (Preview/Program) isn't supported; *Go live* switches Program directly.
+- Scenes can be created, renamed and deleted, but not reordered or duplicated (obs-websocket has
+  no request for either). New scenes appear where OBS puts them.
 - Editors exist for Browser, Media, Image, Image Slideshow and Text sources. Other types can be
   viewed (raw settings), added as existing sources and deleted, but not edited.
 - Desktop-first layout; phones are not a target yet. Below roughly 1,200 px of window width,
@@ -387,10 +424,10 @@ Clearing the browser's site data removes everything.
 src/
   obs/        client, error helpers, kind labels, transform maths, value helpers (paths, colours)
   store/      connection, profiles (saved connections), scenes, inputs (source settings),
-              live (on-air calculations), ui (source scope)
+              live (on-air calculations), names (unique names), ui (source scope)
   components/ shared UI: fields, number field, confirm bar, icons, connect screen, status bar
   features/
-    scenes/   Scenes panel, preview, transform editor, add-source form
+    scenes/   Scenes panel, preview, transform editor, add-source, new-scene and rename forms
     sources/  Sources panel, per-type rows, slideshow file editor, raw/other rows
 docs/
   requirements.md   decisions and feature notes
