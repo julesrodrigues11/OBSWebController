@@ -1,0 +1,223 @@
+import { useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useConnection } from '../store/connection'
+import { EyeIcon, EyeOffIcon } from './icons'
+import { newProfileId, useProfiles, type Profile } from '../store/profiles'
+
+/** Connect using a saved profile. `password` overrides the stored one (for profiles that don't save it). */
+async function connectProfile(p: Profile, password: string) {
+  useConnection.getState().setSettings({ host: p.host.trim(), port: p.port, password, profileId: p.id, profileName: p.name })
+  useProfiles.getState().markUsed(p.id)
+  await useConnection.getState().connect()
+}
+
+const blankProfile = (): Profile => ({ id: newProfileId(), name: '', host: '', port: 4455, password: '', savePassword: true })
+
+/** Connection screen: saved connections, plus add/edit/delete. */
+export function ConnectForm() {
+  const profiles = useProfiles((s) => s.profiles)
+  const lastUsedId = useProfiles((s) => s.lastUsedId)
+  const status = useConnection((s) => s.status)
+  const error = useConnection((s) => s.error)
+  const attemptedId = useConnection((s) => s.settings.profileId)
+
+  const [editing, setEditing] = useState<Profile | null>(() => (profiles.length === 0 ? blankProfile() : null))
+  const [askingPassword, setAskingPassword] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const busy = status === 'connecting'
+
+  function startConnect(p: Profile) {
+    setConfirmDelete(null)
+    if (p.savePassword) void connectProfile(p, p.password)
+    else setAskingPassword(p.id)
+  }
+
+  if (editing) {
+    return (
+      <ProfileEditor
+        profile={editing}
+        isNew={!profiles.some((p) => p.id === editing.id)}
+        canCancel={profiles.length > 0}
+        onCancel={() => setEditing(null)}
+        onSave={(p, andConnect) => {
+          useProfiles.getState().save(p)
+          setEditing(null)
+          if (andConnect) startConnect(p)
+        }}
+      />
+    )
+  }
+
+  return (
+    <div className="connect">
+      <div className="connect__head">
+        <h2>Connections</h2>
+        <button className="button--small" onClick={() => setEditing(blankProfile())} disabled={busy}>
+          + New
+        </button>
+      </div>
+
+      <ul className="profiles">
+        {profiles.map((p) => {
+          const attempted = attemptedId === p.id
+          return (
+            <li key={p.id} className={`profile ${p.id === lastUsedId ? 'is-last' : ''}`}>
+              <div className="profile__main">
+                <div className="profile__info">
+                  <span className="profile__name">{p.name || p.host}</span>
+                  <span className="muted">
+                    {p.host}:{p.port} · {p.savePassword ? 'password saved' : 'asks for password'}
+                    {p.id === lastUsedId && ' · last used'}
+                  </span>
+                </div>
+                {confirmDelete === p.id ? (
+                  <div className="profile__actions">
+                    <span className="muted">Delete?</span>
+                    <button className="button--small button--danger" onClick={() => { useProfiles.getState().remove(p.id); setConfirmDelete(null) }}>
+                      Delete
+                    </button>
+                    <button className="button--small" onClick={() => setConfirmDelete(null)}>Cancel</button>
+                  </div>
+                ) : (
+                  <div className="profile__actions">
+                    <button className="button--small" onClick={() => setEditing({ ...p })} disabled={busy}>Edit</button>
+                    <button className="button--small" onClick={() => setConfirmDelete(p.id)} disabled={busy}>Delete</button>
+                    <button onClick={() => startConnect(p)} disabled={busy}>
+                      {busy && attempted ? 'Connecting…' : 'Connect'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {askingPassword === p.id && (
+                <PasswordPrompt
+                  busy={busy}
+                  onCancel={() => setAskingPassword(null)}
+                  onSubmit={(pw) => { setAskingPassword(null); void connectProfile(p, pw) }}
+                />
+              )}
+              {attempted && error && status === 'error' && <p className="error" role="alert">{error}</p>}
+            </li>
+          )
+        })}
+      </ul>
+
+      <p className="hint">
+        In OBS: Tools → WebSocket Server Settings → enable the server. “Show Connect Info” there gives the IP and
+        password. Connections are saved in this browser only.
+      </p>
+    </div>
+  )
+}
+
+/** Password input with a show/hide button (handy for checking what was typed). */
+function PasswordInput({ value, onChange, autoFocus, disabled, placeholder, autoComplete, onKeyDown }: {
+  value: string
+  onChange: (v: string) => void
+  autoFocus?: boolean
+  disabled?: boolean
+  placeholder?: string
+  autoComplete?: string
+  onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void
+}) {
+  const [visible, setVisible] = useState(false)
+  return (
+    <span className="password">
+      <input
+        type={visible ? 'text' : 'password'}
+        value={value}
+        autoFocus={autoFocus}
+        disabled={disabled}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        spellCheck={false}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
+      />
+      <button
+        type="button"
+        className="icon-button"
+        onClick={() => setVisible(!visible)}
+        disabled={disabled}
+        aria-pressed={visible}
+        title={visible ? 'Hide password' : 'Show password'}
+      >
+        {visible ? <EyeOffIcon /> : <EyeIcon />}
+      </button>
+    </span>
+  )
+}
+
+function PasswordPrompt({ busy, onSubmit, onCancel }: { busy: boolean; onSubmit: (pw: string) => void; onCancel: () => void }) {
+  const [pw, setPw] = useState('')
+  return (
+    <form className="profile__password" onSubmit={(e) => { e.preventDefault(); onSubmit(pw) }}>
+      <PasswordInput
+        autoFocus placeholder="Password" value={pw} autoComplete="current-password"
+        onChange={setPw} onKeyDown={(e) => e.key === 'Escape' && onCancel()}
+      />
+      <button type="submit" disabled={busy}>Connect</button>
+      <button type="button" className="button--small" onClick={onCancel}>Cancel</button>
+    </form>
+  )
+}
+
+interface EditorProps {
+  profile: Profile
+  isNew: boolean
+  canCancel: boolean
+  onSave: (p: Profile, andConnect: boolean) => void
+  onCancel: () => void
+}
+
+function ProfileEditor({ profile, isNew, canCancel, onSave, onCancel }: EditorProps) {
+  const [p, setP] = useState(profile)
+  const set = (patch: Partial<Profile>) => setP({ ...p, ...patch })
+  const valid = p.host.trim() !== '' && p.port >= 1 && p.port <= 65535
+
+  function submit(e: FormEvent, andConnect: boolean) {
+    e.preventDefault()
+    if (!valid) return
+    onSave({ ...p, host: p.host.trim(), name: p.name.trim() || p.host.trim() }, andConnect)
+  }
+
+  return (
+    <form className="connect" onSubmit={(e) => submit(e, true)}>
+      <h2>{isNew ? 'New connection' : `Edit “${profile.name}”`}</h2>
+
+      <label>
+        <span>Name</span>
+        <input autoFocus placeholder="e.g. Studio PC" value={p.name} onChange={(e) => set({ name: e.target.value })} />
+      </label>
+      <label>
+        <span>OBS PC address</span>
+        <input placeholder="e.g. 192.168.1.50" value={p.host} onChange={(e) => set({ host: e.target.value })} />
+      </label>
+      <label>
+        <span>Port</span>
+        <input type="number" min={1} max={65535} value={p.port} onChange={(e) => set({ port: Number(e.target.value) || 4455 })} />
+      </label>
+      <label>
+        <span>Password</span>
+        <PasswordInput
+          autoComplete="new-password" value={p.password}
+          placeholder={p.savePassword ? '' : 'Asked for each time you connect'}
+          disabled={!p.savePassword}
+          onChange={(v) => set({ password: v })}
+        />
+      </label>
+      <label className="checkbox">
+        <input type="checkbox" checked={p.savePassword} onChange={(e) => set({ savePassword: e.target.checked, password: e.target.checked ? p.password : '' })} />
+        <span>Save password in this browser</span>
+      </label>
+      {p.savePassword && (
+        <p className="hint">Stored unencrypted in this browser's storage. Untick on shared computers.</p>
+      )}
+
+      <div className="connect__buttons">
+        {canCancel && <button type="button" className="button--small" onClick={onCancel}>Cancel</button>}
+        <button type="button" className="button--small" disabled={!valid} onClick={(e) => submit(e, false)}>Save</button>
+        <button type="submit" disabled={!valid}>Save &amp; connect</button>
+      </div>
+    </form>
+  )
+}
