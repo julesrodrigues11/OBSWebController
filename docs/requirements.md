@@ -88,7 +88,7 @@ Status: decisions agreed in discussion so far. Open questions at the end.
 
 ## Testing (built)
 - Vitest + Testing Library + jsdom; a fake obs-websocket server (`tests/mock`) with demo content,
-  request log, failure injection and connection drops. 127 tests (unit + app).
+  request log, failure injection and connection drops. 146 tests (unit + app + host server + scripts).
 - GitHub Actions CI on every push: npm ci, typecheck, lint, test, build (Node 22, Ubuntu).
 - Real-OBS behaviour is checked by hand: `docs/manual-test-checklist.md`.
 - Minimum Node.js 22.12 (Vitest). jsdom kept at 28: jsdom 30+ needs Node 22.22+/24.15+ and fails on
@@ -105,6 +105,30 @@ Status: decisions agreed in discussion so far. Open questions at the end.
 - Import matches by name (case/space-insensitive): new ones added (asking for a password if
   none in the file); differing ones → one question: Update them / Keep mine / Cancel import;
   identical ones left alone. Updating keeps the saved password if the file has none.
+
+## Versioning and releases (built)
+- Semantic versioning; version only in package.json, shown in the top bar (built in by Vite as
+  __APP_VERSION__) and printed by the host server. 0.x until hosting, presets and the manual
+  checklist are done and colleagues rely on it; then 1.0.0.
+- CHANGELOG.md (Keep a Changelog). `npm version <patch|minor|major>` runs
+  scripts/changelog.mjs, which moves Unreleased notes under the new version (refuses if empty);
+  .npmrc sets the commit message "Release v%s".
+- release.yml on v* tags: tag must equal package.json version; typecheck, lint, test, build,
+  `npm run package`, zip, notes from CHANGELOG, `gh release create` with the zip. Pre-release
+  versions (with "-") are marked as pre-releases. Uses the built-in GITHUB_TOKEN only.
+
+## Hosting (built)
+- host/server.mjs: Node built-ins only; serves the app, index re-checked every load, hashed
+  assets cached long-term, refuses paths outside the app folder, GET/HEAD only, prints LAN
+  addresses, friendly "port in use" error. Answers /host.json {app, version, obsHost, obsPort}.
+- host-config.json: port (8080), obsHost ("same" | address | null), obsPort (4455).
+- Windows scripts (CRLF via .gitattributes): start.bat (checks Node), install/remove-autostart
+  (Startup-folder shortcut, minimised), add-firewall-rule.bat (admin; app + OBS ports, private
+  profile). Start-on-login chosen over a Windows service (OBS PC is usually logged in).
+- Package: release/obs-web-controller/{app/, server.mjs, *.bat, host-config.json,
+  README-host.txt, VERSION}; zip ~110 KB.
+- When hosted, new connections pre-fill the OBS address ("same" = the page's hostname) and port;
+  fields the user typed are never overwritten; existing connections aren't affected.
 
 ## Code structure
 - ScenesPanel split (Nov 2026) into SceneSection, SceneHeader, ItemRow, OrderButtons, with

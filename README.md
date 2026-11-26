@@ -41,9 +41,11 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - [What it is (and isn't) for](#what-it-is-and-isnt-for)
 - [Features](#features)
 - [How it works](#how-it-works)
+- [Where to run it](#where-to-run-it)
 - [Requirements](#requirements)
 - [Setting up OBS](#setting-up-obs)
-- [Installing and running](#installing-and-running)
+- [Hosting on the OBS PC](#hosting-on-the-obs-pc)
+- [Running from source](#running-from-source)
 - [Connecting](#connecting)
 - [Using the app](#using-the-app)
   - [Program preview](#program-preview)
@@ -56,6 +58,7 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - [Limitations](#limitations)
 - [Development](#development)
 - [Testing](#testing)
+- [Releasing](#releasing)
 
 ---
 
@@ -88,6 +91,9 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 **General**
 - Saved connections (name, address, port, optional saved password), with **export and import**
   to share them as a file
+- **Hosting package** for the OBS PC: a small web server with start / start-at-log-in scripts,
+  so colleagues just open an address; new connections then point at the OBS PC automatically
+- Version number in the top bar; releases with notes and a download on GitHub
 - Live sync: changes made in OBS itself appear immediately
 - Automatic reconnection if OBS restarts or the network drops
 - Clear error messages naming the request, source and OBS error code
@@ -107,12 +113,26 @@ built into OBS. Nothing needs to be installed on the OBS machine, and there is n
 
 ---
 
+## Where to run it
+
+The app has to be **served** by some computer, and then any browser on the network can use it.
+That computer can be the OBS PC, your own PC, or another PC that's always on: the app works the
+same way in each case, because the browser always talks to OBS directly.
+
+| Setup | Best for | How |
+|---|---|---|
+| **Hosted on the OBS PC** (recommended) | Everyday use by you and colleagues | Download the release zip, start `start.bat` (or let it start at log-in). Everyone opens `http://<obs-pc>:8080`; nothing is installed on their computers, and new connections already point at the OBS PC. See [Hosting on the OBS PC](#hosting-on-the-obs-pc). |
+| **From source on your own PC** | Development, or when only you use it | `npm install`, `npm run dev`, open `http://localhost:5173`. See [Running from source](#running-from-source). |
+| **Hosted on another always-on PC** | When the OBS PC shouldn't run anything extra | Same package as the OBS PC. Set `"obsHost"` in `host-config.json` to the OBS PC's address so new connections point at it. |
+
+---
+
 ## Requirements
 
 | Where | What |
 |---|---|
 | OBS PC | OBS Studio **28 or later** (obs-websocket v5 is built in). OBS 30 or later is recommended: older versions don't report source setting changes live. |
-| Controller PC | [Node.js](https://nodejs.org/) **22.12 or later** (`node -v` to check). The current LTS (22 or 24) is recommended. |
+| PC that serves the app | [Node.js](https://nodejs.org/) LTS (`node -v` to check). Running from source or running the tests needs **22.12 or later**. Computers that only *use* the app need nothing but a browser. |
 | Browser | A current Chromium-based browser, Firefox or Safari |
 | Network | Both machines on the same local network |
 
@@ -134,9 +154,55 @@ built into OBS. Nothing needs to be installed on the OBS machine, and there is n
 
 ---
 
-## Installing and running
+## Hosting on the OBS PC
 
-Clone the repository, then on the **controller PC**:
+Each [release](https://github.com/julesrodrigues11/OBSWebController/releases) has a zip,
+`obs-web-controller-v<version>-windows.zip`, containing the built app and a small web server.
+
+**First-time setup** (once, on the OBS PC):
+
+1. Install [Node.js](https://nodejs.org/) LTS if it isn't already.
+2. Download the zip from the latest release. Right-click it → **Properties** → tick **Unblock** →
+   **OK** (avoids Windows security prompts), then extract the `obs-web-controller` folder
+   somewhere permanent, e.g. `C:\OBS Web Controller\`.
+3. Right-click **`add-firewall-rule.bat`** → **Run as administrator**. This allows other PCs to
+   reach the app (port 8080) and OBS's WebSocket server (port 4455) on private networks.
+4. Double-click **`start.bat`**. Its window shows the addresses to use, for example:
+   ```
+   OBS Web Controller v0.1.0 is running.
+     On this PC:        http://localhost:8080
+     From other PCs:    http://192.168.1.50:8080
+   ```
+   Keep the window open (minimise it) while the app is in use; closing it stops the app.
+5. Optional: double-click **`install-autostart.bat`** so it starts, minimised, whenever you log
+   in. **`remove-autostart.bat`** undoes this.
+
+Colleagues open the "From other PCs" address and bookmark it. **+ New** connections already have
+the OBS PC's address filled in, so they only enter the OBS WebSocket password.
+
+**Settings** are in `host-config.json` in the same folder (restart `start.bat` after changing):
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `port` | `8080` | Port the app is served on. If you change it, run `add-firewall-rule.bat <port>` as administrator. |
+| `obsHost` | `"same"` | Where OBS is, used to pre-fill new connections: `"same"` (this PC), an address such as `"192.168.1.70"` (OBS on another PC), or `null` (no suggestion). |
+| `obsPort` | `4455` | OBS WebSocket port, used to pre-fill new connections. |
+
+**Updating:** close the `start.bat` window, download the new release zip (unblock it as before),
+replace the folder's contents (keep `host-config.json` if you changed it), and start it again.
+Users just reload the page; their saved connections stay in their browsers.
+
+The zip also contains `README-host.txt` with these steps, for the OBS PC itself.
+
+To build the same package yourself from source: `npm run package` (creates
+`release/obs-web-controller/`). To try the host server locally on a build: `npm run build`, then
+`npm run serve` (serves `dist/` at `http://localhost:8080`).
+
+---
+
+## Running from source
+
+Clone the repository, then on **your PC**:
 
 ```bash
 npm install     # first time only
@@ -157,17 +223,11 @@ Open <http://localhost:5173> in your browser.
 | `npm run typecheck` | Checks the TypeScript types without building |
 | `npm test` | Runs the automated tests once ([see Testing](#testing)) |
 | `npm run test:watch` | Re-runs the tests whenever you save a file |
+| `npm run package` | Builds and assembles the hosting package in `release/` |
+| `npm run serve` | Serves the built `dist/` with the host server at `http://localhost:8080` |
 
-### Hosting a built copy
-
-`npm run build` produces a self-contained static site in `dist/` that uses relative paths, so it
-can be served from any folder or web server, including from the OBS PC itself. Colleagues then
-only need the URL and the OBS password. Any static file server works, for example:
-
-```bash
-npx serve dist
-```
-
+`dist/` is a self-contained static site with relative paths, so any web server can host it.
+The included host server adds the "same PC" connection default and update-friendly caching.
 Serve it over **plain HTTP on your LAN** (see [Troubleshooting](#troubleshooting) for why HTTPS
 pages can't reach OBS without extra setup).
 
@@ -208,8 +268,11 @@ colleague, use **Export** and **Import** at the top of the connections screen.
 
 The file also has room for future settings (such as presets), so one file will carry them all.
 
-The status bar shows which connection you're on, the OBS and obs-websocket versions, and a
-**Disconnect** button. If the connection drops, a banner appears and the app reconnects by
+When the app is [hosted on the OBS PC](#hosting-on-the-obs-pc), **+ New** starts with that
+PC's address and OBS port filled in (fields you type in are never overwritten).
+
+The status bar shows the app's version (e.g. *v0.1.0*), which connection you're on, the OBS
+and obs-websocket versions, and a **Disconnect** button. If the connection drops, a banner appears and the app reconnects by
 itself (after 1, 2, 5, then every 10 seconds). A wrong password is not retried.
 
 ---
@@ -419,6 +482,10 @@ computer. Clearing the browser's site data removes everything.
 | Some fields look blank | OBS only reports values you've changed; defaults come from a separate request that some source types refuse. Open `{ }` to see what OBS actually stores. |
 | Changes made in OBS don't appear | Your OBS's obs-websocket is older than 5.4 (a banner says so). Update OBS, or reconnect to refresh. |
 | A source type isn't in the tables | It appears in the **Other** table with its type ID; it has no editor yet. |
+| Hosting: *Node.js isn't installed* | Install Node.js LTS, then close and reopen the `start.bat` window. |
+| Hosting: *port 8080 is already in use* | It's probably already running (check the taskbar), or another program uses the port: change `port` in `host-config.json`. |
+| Hosting: other PCs can't open the address | Run `add-firewall-rule.bat` as administrator, and make sure Windows treats the network as **Private** (Settings → Network & internet). |
+| Colleagues see an old version after an update | Reload the page (Ctrl+F5 if needed). The host server tells browsers to re-check the page, so this should be rare. |
 
 ---
 
@@ -468,10 +535,17 @@ tests/
   unit/       tests for pure logic: maths, conversions, on-air rules
   app/        tests that drive the real interface against the fake OBS
   helpers.tsx render/connect helpers and "find this on screen" functions
+host/         the hosting package: server.mjs (web server, Node built-ins only), start.bat,
+              install/remove-autostart.bat, add-firewall-rule.bat, host-config.json,
+              README-host.txt
+scripts/      package.mjs (assembles the hosting package), changelog.mjs (release notes)
 docs/
   requirements.md          decisions and feature notes
   manual-test-checklist.md things to check by hand against a real OBS
-.github/workflows/ci.yml   the checks GitHub runs on every push
+CHANGELOG.md               what changed in each version
+.github/workflows/
+  ci.yml                   the checks GitHub runs on every push
+  release.yml              builds and publishes a release when a version tag is pushed
 ```
 
 Key ideas:
@@ -521,6 +595,8 @@ and it can fail requests or drop connections on purpose.
 | `tests/app/sources.test.tsx` | Editing every source type, apply/cancel rules, slideshow list, media controls, live sync, partial load failures, scope and filters |
 | `tests/app/manage.test.tsx` | Adding, removing and deleting sources; creating, renaming and deleting scenes |
 | `tests/app/transfer.test.tsx` | Exporting (with/without passwords) and importing connections, including the update-or-keep question and bad files |
+| `tests/app/hosting.test.tsx` | Version in the top bar; pre-filled connections when hosted (same PC / other PC / not hosted), never overwriting typed values |
+| `tests/unit/server.test.ts`, `changelog.test.ts` | The host server (files, caching, `host.json`, refusing paths outside the app, settings) and the changelog/release-notes script |
 
 App tests use [Testing Library](https://testing-library.com/) to click and type like a person
 would, in a simulated browser ([jsdom](https://github.com/jsdom/jsdom)), run by
@@ -552,3 +628,43 @@ test('the eye hides an item, and OBS receives the change', async () => {
     .toMatchObject({ sceneName: 'Main', sceneItemEnabled: false })
 })
 ```
+
+---
+
+## Releasing
+
+Versions follow [semantic versioning](https://semver.org/), **MAJOR.MINOR.PATCH**:
+
+| Part | Goes up for | Example |
+|---|---|---|
+| PATCH | Bug fixes only | 0.2.0 → 0.2.1 |
+| MINOR | New features that don't break existing use | 0.2.1 → 0.3.0 |
+| MAJOR | Changes that break existing use (e.g. old export files no longer readable) | 1.4.0 → 2.0.0 |
+
+While the version starts with **0**, the app is usable but still settling; 1.0.0 marks it as
+stable. The version lives only in `package.json`; the app shows it in the top bar and the host
+server prints it on start.
+
+**As you go:** add each change to the **Unreleased** section of [CHANGELOG.md](CHANGELOG.md),
+under *Added*, *Changed* or *Fixed*.
+
+**To release** (with everything committed and pushed):
+
+```bash
+npm version minor          # or: npm version patch / npm version major
+git push --follow-tags
+```
+
+`npm version` updates `package.json`, moves the Unreleased notes in `CHANGELOG.md` under the new
+version and today's date, commits ("Release v0.2.0") and tags the commit (`v0.2.0`). It stops
+with a message if the Unreleased section is empty.
+
+Pushing the tag starts the **Release** workflow (`.github/workflows/release.yml`) on GitHub. It
+checks the tag matches `package.json`, runs the type-check, lint and tests, builds the hosting
+package, zips it, and publishes a **Release** on the repository's
+[Releases page](https://github.com/julesrodrigues11/OBSWebController/releases) with the
+changelog notes and the zip attached. Watch it on the **Actions** tab; it takes a few minutes.
+
+If the release workflow fails, nothing is published. Fix the problem, then either delete the tag
+(`git tag -d v0.2.0` and `git push --delete origin v0.2.0`) and release again, or release the
+fix as the next patch version.

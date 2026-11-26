@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { useConnection } from './store/connection'
+import { loadHostInfo } from './store/host'
 import { StatusBar } from './components/StatusBar'
 import { ConnectForm } from './components/ConnectForm'
 import { ScenesPanel } from './features/scenes/ScenesPanel'
@@ -8,6 +10,11 @@ export default function App() {
   const status = useConnection((s) => s.status)
   const server = useConnection((s) => s.server)
   const error = useConnection((s) => s.error)
+
+  // Find out whether we're served by the host server (e.g. on the OBS PC).
+  useEffect(() => {
+    void loadHostInfo()
+  }, [])
 
   // Keep showing the (stale) panels while reconnecting, with a banner on top.
   const showPanels = status === 'connected' || status === 'reconnecting'

@@ -1,4 +1,5 @@
 import { useConnection } from '../store/connection'
+import { APP_VERSION } from '../version'
 
 const LABELS = {
   disconnected: 'Not connected',
@@ -18,7 +19,9 @@ export function StatusBar() {
 
   return (
     <header className="topbar">
-      <h1>OBS Web Controller</h1>
+      <h1>
+        OBS Web Controller <span className="topbar__version" title="App version">v{APP_VERSION}</span>
+      </h1>
       <div className="topbar__right">
         {online && (
           <span className="muted">

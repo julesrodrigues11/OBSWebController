@@ -1,0 +1,78 @@
+# Release: runs when a version tag (e.g. v0.2.0) is pushed. It checks everything, builds the
+# hosting package, and publishes it as a GitHub Release with notes from CHANGELOG.md.
+# Make a release with:  npm version minor   (or patch / major)  then  git push --follow-tags
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write # allows this workflow to create the release; nothing else
+
+jobs:
+  release:
+    name: Build and publish ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check the tag matches package.json
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ "${GITHUB_REF_NAME}" != "v${VERSION}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} doesn't match package.json version ${VERSION}. Use 'npm version' to make releases."
+            exit 1
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Install exactly what package-lock.json lists
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build and assemble the package
+        run: npm run package
+
+      - name: Zip it
+        run: |
+          cd release
+          zip -r -q "../obs-web-controller-v${VERSION}-windows.zip" obs-web-controller
+          cd ..
+          ls -l "obs-web-controller-v${VERSION}-windows.zip"
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          node scripts/changelog.mjs notes "${VERSION}" > notes.md
+          cat >> notes.md <<'NOTES'
+
+          ---
+
+          **Hosting on a PC:** download `obs-web-controller-v*-windows.zip` below, unblock it
+          (right-click > Properties > Unblock), extract it, and follow `README-host.txt` inside.
+          NOTES
+          cat notes.md
+
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PRERELEASE=""
+          case "${VERSION}" in *-*) PRERELEASE="--prerelease" ;; esac
+          gh release create "${GITHUB_REF_NAME}" "obs-web-controller-v${VERSION}-windows.zip" \
+            --title "v${VERSION}" --notes-file notes.md ${PRERELEASE}

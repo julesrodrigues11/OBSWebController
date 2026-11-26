@@ -293,3 +293,5 @@ input.is-invalid { border-color: var(--live); }
 .transfer__actions { display: flex; justify-content: flex-end; gap: 6px; }
 .transfer__done { flex-basis: 100%; order: 11; margin: 0; color: var(--ok); font-size: 0.85rem; }
 .transfer > .error { flex-basis: 100%; order: 11; font-size: 0.85rem; }
+.topbar__version { font-weight: 400; font-size: 0.75rem; color: var(--muted); margin-left: 4px; }
+.connect__prefilled { color: #7c9cff; margin: 0; }

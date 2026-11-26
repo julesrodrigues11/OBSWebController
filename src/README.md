@@ -1,10 +1,12 @@
 # Source layout
 
+- `version.ts`: the app's version (from package.json)
 - `obs/`: the obs-websocket client, input-kind labels, transform maths, value helpers (paths, colours)
 - `store/`: Zustand stores. `connection` owns the OBS connection; `profiles` holds saved
   connections; `scenes` holds scene items, transforms and scene create/rename/delete; `inputs`
   holds source settings and media state; `live` works out what's on air; `names` checks name
-  uniqueness; `settingsFile` builds and reads export files; `ui` holds the Sources scope
+  uniqueness; `settingsFile` builds and reads export files; `ui` holds the Sources scope; `host` knows whether
+  the app is served by the host server (and the OBS address to suggest)
 - `lib/`: `storage.ts` (safe browser-storage helpers, every stored key in one list) and
   `download.ts` (save text as a file)
 - `components/`: shared UI pieces (inline editors, number fields, toggles, badges), the connection

@@ -1,0 +1,5 @@
+{
+  "port": 8080,
+  "obsHost": "same",
+  "obsPort": 4455
+}

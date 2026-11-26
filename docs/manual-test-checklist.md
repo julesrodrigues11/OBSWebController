@@ -78,6 +78,20 @@ Sources panel and compare with OBS's own Properties window.
 - [ ] At *every 0.5s*, OBS's own stats (*Docks → Stats*) show no dropped/lagged frames.
 - [ ] Collapsing it (or switching to another browser tab) stops the snapshots.
 
+## Hosting package (on the OBS PC)
+
+- [ ] Download the release zip, unblock it, extract it. `start.bat` starts and lists the
+      addresses; the app opens at `http://localhost:8080` on the OBS PC.
+- [ ] `add-firewall-rule.bat` (as administrator) → another PC can open
+      `http://<obs-pc>:8080` and connect to OBS.
+- [ ] On another PC, **+ New** shows the OBS PC's address and port filled in.
+- [ ] The top bar shows the release's version.
+- [ ] `install-autostart.bat` → log out and in → the server starts minimised.
+      `remove-autostart.bat` → it no longer starts.
+- [ ] Start a second `start.bat` while one is running → "port 8080 is already in use".
+- [ ] Update to a newer release (replace the folder) → after a reload, the top bar shows the new
+      version.
+
 ## Findings
 
 | Date | OBS version | Item | What happened |

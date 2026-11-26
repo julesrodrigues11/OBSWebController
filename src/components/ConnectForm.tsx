@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type KeyboardEvent } from 'react'
+import { suggestedObs, useHost } from '../store/host'
 import { useConnection } from '../store/connection'
 import { EyeIcon, EyeOffIcon } from './icons'
 import { SettingsTransfer } from './SettingsTransfer'
@@ -172,10 +173,28 @@ interface EditorProps {
 }
 
 function ProfileEditor({ profile, isNew, canCancel, onSave, onCancel }: EditorProps) {
-  const [p, setP] = useState(profile)
-  const set = (patch: Partial<Profile>) => setP({ ...p, ...patch })
+  const [draft, setDraft] = useState(profile)
   // Port is kept as typed text so the field can be cleared and retyped; it's checked on save.
-  const [portText, setPortText] = useState(String(profile.port))
+  const [portDraft, setPortDraft] = useState(String(profile.port))
+  /** Fields the user has typed in (suggestions never overwrite those). */
+  const [edited, setEdited] = useState<Set<'name' | 'host' | 'port'>>(() => new Set())
+  const touch = (f: 'name' | 'host' | 'port') => setEdited((s) => new Set(s).add(f))
+  const set = (patch: Partial<Profile>) => setDraft({ ...draft, ...patch })
+
+  // When the app is hosted (e.g. on the OBS PC), a new connection starts with that PC's address
+  // and OBS port filled in, until the user types their own.
+  const hostInfo = useHost((s) => s.info)
+  const suggestion = isNew ? suggestedObs(hostInfo) : null
+  const suggest = <T,>(field: 'name' | 'host' | 'port', current: T, empty: T, value: T | undefined): T =>
+    suggestion && !edited.has(field) && current === empty && value !== undefined ? value : current
+  const p = {
+    ...draft,
+    host: suggest('host', draft.host, '', suggestion?.host),
+    name: suggest('name', draft.name, '', suggestion?.same ? 'OBS PC' : undefined),
+  }
+  const portText = suggest('port', portDraft, String(profile.port), suggestion ? String(suggestion.port) : undefined)
+  const prefilled = !!suggestion && p.host === suggestion.host
+
   const port = Number(portText)
   const portValid = Number.isInteger(port) && port >= 1 && port <= 65535
   const valid = p.host.trim() !== '' && portValid
@@ -189,14 +208,21 @@ function ProfileEditor({ profile, isNew, canCancel, onSave, onCancel }: EditorPr
   return (
     <form className="connect" onSubmit={(e) => submit(e, true)}>
       <h2>{isNew ? 'New connection' : `Edit “${profile.name}”`}</h2>
+      {prefilled && (
+        <p className="hint connect__prefilled">
+          {suggestion!.same
+            ? 'This app is running on the OBS PC, so its address is filled in: just enter the OBS WebSocket password.'
+            : 'The OBS PC’s address is filled in from the host settings: just enter the OBS WebSocket password.'}
+        </p>
+      )}
 
       <label>
         <span>Name</span>
-        <input autoFocus placeholder="e.g. Studio PC" value={p.name} onChange={(e) => set({ name: e.target.value })} />
+        <input autoFocus placeholder="e.g. Studio PC" value={p.name} onChange={(e) => { touch('name'); set({ name: e.target.value }) }} />
       </label>
       <label>
         <span>OBS PC address</span>
-        <input placeholder="e.g. 192.168.1.50" value={p.host} onChange={(e) => set({ host: e.target.value })} />
+        <input placeholder="e.g. 192.168.1.50" value={p.host} onChange={(e) => { touch('host'); set({ host: e.target.value }) }} />
       </label>
       <label>
         <span>Port</span>
@@ -204,7 +230,7 @@ function ProfileEditor({ profile, isNew, canCancel, onSave, onCancel }: EditorPr
           type="number" min={1} max={65535} value={portText} placeholder="4455"
           className={portValid ? '' : 'is-invalid'}
           title={portValid ? undefined : 'Port must be a number from 1 to 65535'}
-          onChange={(e) => setPortText(e.target.value)}
+          onChange={(e) => { touch('port'); setPortDraft(e.target.value) }}
         />
       </label>
       <label>
