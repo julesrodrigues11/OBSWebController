@@ -485,6 +485,8 @@ computer. Clearing the browser's site data removes everything.
 - **Never forward port 4455 to the internet.** For remote access, use a VPN such as Tailscale or
   WireGuard instead.
 
+Found a security problem? Please report it privately, as described in [SECURITY.md](SECURITY.md).
+
 ---
 
 ## Troubleshooting
@@ -576,6 +578,8 @@ Key ideas:
   and lists (slideshow `files`) are always sent whole.
 
 See `src/README.md` for the folder layout and `docs/requirements.md` for design decisions.
+
+Want to report a bug or contribute? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
