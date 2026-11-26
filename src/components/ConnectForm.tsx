@@ -3,6 +3,7 @@ import { suggestedObs, useHost } from '../store/host'
 import { useConnection } from '../store/connection'
 import { EyeIcon, EyeOffIcon } from './icons'
 import { SettingsTransfer } from './SettingsTransfer'
+import { useImportConnections } from './useImportConnections'
 import { newProfileId, useProfiles, type Profile } from '../store/profiles'
 
 /** Connect using a saved profile. `password` overrides the stored one (for profiles that don't save it). */
@@ -25,6 +26,8 @@ export function ConnectForm() {
   const [editing, setEditing] = useState<Profile | null>(() => (profiles.length === 0 ? blankProfile() : null))
   const [askingPassword, setAskingPassword] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  /** Result of an import made from the first-run form, shown above the list. */
+  const [notice, setNotice] = useState<string | null>(null)
   const busy = status === 'connecting'
 
   function startConnect(p: Profile) {
@@ -40,6 +43,8 @@ export function ConnectForm() {
         isNew={!profiles.some((p) => p.id === editing.id)}
         canCancel={profiles.length > 0}
         onCancel={() => setEditing(null)}
+        // First run (nothing saved yet): offer importing a connections file instead.
+        onImported={profiles.length === 0 ? (summary) => { setEditing(null); setNotice(summary) } : undefined}
         onSave={(p, andConnect) => {
           useProfiles.getState().save(p)
           setEditing(null)
@@ -58,6 +63,7 @@ export function ConnectForm() {
           + New
         </button>
       </div>
+      {notice && <p className="transfer__done connect__notice" role="status">{notice}</p>}
 
       <ul className="profiles">
         {profiles.map((p) => {
@@ -168,11 +174,13 @@ interface EditorProps {
   profile: Profile
   isNew: boolean
   canCancel: boolean
+  /** When set, the form offers importing a connections file (first run). */
+  onImported?: (summary: string) => void
   onSave: (p: Profile, andConnect: boolean) => void
   onCancel: () => void
 }
 
-function ProfileEditor({ profile, isNew, canCancel, onSave, onCancel }: EditorProps) {
+function ProfileEditor({ profile, isNew, canCancel, onSave, onCancel, onImported }: EditorProps) {
   const [draft, setDraft] = useState(profile)
   // Port is kept as typed text so the field can be cleared and retyped; it's checked on save.
   const [portDraft, setPortDraft] = useState(String(profile.port))
@@ -208,6 +216,7 @@ function ProfileEditor({ profile, isNew, canCancel, onSave, onCancel }: EditorPr
   return (
     <form className="connect" onSubmit={(e) => submit(e, true)}>
       <h2>{isNew ? 'New connection' : `Edit “${profile.name}”`}</h2>
+      {onImported && <FirstRunImport onImported={onImported} />}
       {prefilled && (
         <p className="hint connect__prefilled">
           {suggestion!.same
@@ -256,5 +265,21 @@ function ProfileEditor({ profile, isNew, canCancel, onSave, onCancel }: EditorPr
         <button type="submit" disabled={!valid}>Save &amp; connect</button>
       </div>
     </form>
+  )
+}
+
+/** "Already have a connections file?" on the first-run form. */
+function FirstRunImport({ onImported }: { onImported: (summary: string) => void }) {
+  const importer = useImportConnections({ onImported, testId: 'first-run-import-file' })
+  return (
+    <div className="connect__import">
+      <div className="connect__import-row">
+        <span>Already have a connections file (e.g. exported on another computer)?</span>
+        <button type="button" className="button--small" onClick={importer.choose}>Import file…</button>
+        {importer.input}
+      </div>
+      {importer.question}
+      {importer.notice}
+    </div>
   )
 }

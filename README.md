@@ -265,6 +265,10 @@ colleague, use **Export** and **Import** at the top of the connections screen.
     details; your saved password is kept if the file has none), **Keep mine**, or
     **Cancel import**.
   - Identical connections are left alone. A summary says what was added, updated or kept.
+- **First run:** when there are no saved connections yet, the app opens on the
+  **New connection** form, which also offers **Import file…**. Pick a connections file and the
+  form closes, showing the imported connections ready to use. If the file can't be read, the
+  reason is shown and the form stays open.
 
 The file also has room for future settings (such as presets), so one file will carry them all.
 

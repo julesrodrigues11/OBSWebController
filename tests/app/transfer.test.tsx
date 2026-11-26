@@ -1,4 +1,6 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import App from '../../src/App'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { useProfiles, type Profile } from '../../src/store/profiles'
 import { profileRow, renderApp } from '../helpers'
@@ -113,5 +115,45 @@ describe('import', () => {
     await user.upload(fileInput(), new File([await downloaded[0].blob.text()], 'back.json', { type: 'application/json' }))
     await waitFor(() => expect(screen.getByRole('status').textContent).toMatch(/2 already up to date/))
     expect(screen.queryByRole('alertdialog')).toBeNull()
+  })
+})
+
+describe('import on the first-run "New connection" form', () => {
+  /** A genuine first run: nothing saved, so the app opens straight onto the New connection form. */
+  async function firstRun() {
+    useProfiles.setState({ profiles: [], lastUsedId: null })
+    const user = userEvent.setup()
+    render(<App />)
+    await screen.findByRole('heading', { name: 'New connection' })
+    return { user, input: () => screen.getByTestId('first-run-import-file') as HTMLInputElement }
+  }
+
+  test('offers "Import file…"; a good file closes the form and lists the connections', async () => {
+    const { user, input } = await firstRun()
+    expect(screen.getByRole('button', { name: 'Import file…' })).toBeTruthy()
+    await user.upload(input(), settingsFile([
+      { name: 'Studio PC', host: '192.168.1.50', port: 4455 },
+      { name: 'Lecture hall', host: '192.168.1.60', port: 4455, password: 'pw' },
+    ]))
+    await screen.findByText('Studio PC')
+    expect(screen.queryByRole('heading', { name: 'New connection' })).toBeNull()
+    expect(profileRow('Lecture hall')).toBeTruthy()
+    expect(screen.getByRole('status').textContent).toBe('Import done: added 2.')
+    expect(useProfiles.getState().profiles.map((p) => p.name)).toEqual(['Studio PC', 'Lecture hall'])
+  })
+
+  test('a bad file shows the error and keeps the form open', async () => {
+    const { user, input } = await firstRun()
+    await user.upload(input(), new File(['not json'], 'oops.json', { type: 'application/json' }))
+    expect((await screen.findByRole('status')).className).toBe('error')
+    expect(screen.getByRole('heading', { name: 'New connection' })).toBeTruthy()
+    expect(useProfiles.getState().profiles).toEqual([])
+  })
+
+  test('is not offered when adding a connection alongside saved ones', async () => {
+    const { user } = await setup([saved({ name: 'Studio PC' })])
+    await user.click(screen.getByRole('button', { name: '+ New' }))
+    await screen.findByRole('heading', { name: 'New connection' })
+    expect(screen.queryByRole('button', { name: 'Import file…' })).toBeNull()
   })
 })

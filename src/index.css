@@ -295,3 +295,7 @@ input.is-invalid { border-color: var(--live); }
 .transfer > .error { flex-basis: 100%; order: 11; font-size: 0.85rem; }
 .topbar__version { font-weight: 400; font-size: 0.75rem; color: var(--muted); margin-left: 4px; }
 .connect__prefilled { color: #7c9cff; margin: 0; }
+.connect__import { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border: 1px dashed var(--border); border-radius: 6px; }
+.connect__import-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.85rem; color: var(--muted); }
+.connect__import .error, .connect__import .transfer__done { margin: 0; font-size: 0.85rem; }
+.connect__notice { margin: 0; }

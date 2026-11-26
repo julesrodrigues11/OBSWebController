@@ -10,6 +10,11 @@ section when a release is made (see "Releasing" in the README).
 
 ## [Unreleased]
 
+### Added
+
+- The first-run **New connection** form has an **Import file…** option, so a connections file
+  exported elsewhere can be loaded straight away instead of typing a connection in.
+
 ## [0.1.0] - 2026-11-26
 
 First release.

@@ -105,6 +105,8 @@ Status: decisions agreed in discussion so far. Open questions at the end.
 - Import matches by name (case/space-insensitive): new ones added (asking for a password if
   none in the file); differing ones → one question: Update them / Keep mine / Cancel import;
   identical ones left alone. Updating keeps the saved password if the file has none.
+- First run (no saved connections): the New connection form also offers "Import file…"; a
+  successful import closes the form and shows the list with the summary.
 
 ## Versioning and releases (built)
 - Semantic versioning; version only in package.json, shown in the top bar (built in by Vite as

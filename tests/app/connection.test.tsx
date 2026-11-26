@@ -65,7 +65,8 @@ describe('saved connections', () => {
     useProfiles.setState({ profiles: [], lastUsedId: null })
     await user.click(screen.getByRole('button', { name: '+ New' }))
     const form = document.querySelector('form.connect') as HTMLElement
-    const [name, host, port, password] = form.querySelectorAll('input')
+    const field = (label: string) => within(form).getByText(label, { selector: 'label > span' }).parentElement!.querySelector('input')!
+    const [name, host, port, password] = ['Name', 'OBS PC address', 'Port', 'Password'].map(field)
     await user.type(name, 'Studio PC')
     await user.type(host, '127.0.0.1')
     await user.clear(port)

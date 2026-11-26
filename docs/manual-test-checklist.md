@@ -16,6 +16,8 @@ Tick each item; note anything unexpected (and the OBS version) under *Findings* 
 - [ ] Close OBS while connected: the *Reconnecting* banner appears. Reopen OBS: the app
       reconnects by itself and the scenes reload.
 - [ ] Status bar shows the correct OBS and obs-websocket versions.
+- [ ] Fresh browser (or a private window): the New connection form offers **Import file…**;
+      importing an exported file closes the form and lists the connections.
 
 ## Defaults and stored settings
 
