@@ -2,19 +2,11 @@ import { useEffect, useState } from 'react'
 import { obs, errorText } from '../../obs/client'
 import { useConnection } from '../../store/connection'
 import { ChevronIcon } from '../../components/icons'
+import { STORAGE_KEYS, readString, writeString } from '../../lib/storage'
 
-const OPEN_KEY = 'obs-web-controller:preview-open'
-const RATE_KEY = 'obs-web-controller:preview-rate'
 /** Seconds between frames. Each frame is a JPEG encoded by OBS, so keep this modest. */
 const RATES = [0.5, 1, 2, 5]
 const WIDTH = 640
-
-function read(key: string, fallback: string) {
-  try { return localStorage.getItem(key) ?? fallback } catch { return fallback }
-}
-function write(key: string, v: string) {
-  try { localStorage.setItem(key, v) } catch { /* ignore */ }
-}
 
 /**
  * Collapsible, low-rate snapshot of the Program scene (GetSourceScreenshot).
@@ -23,8 +15,8 @@ function write(key: string, v: string) {
 export function ProgramPreview() {
   const programScene = useConnection((s) => s.programScene)
   const status = useConnection((s) => s.status)
-  const [open, setOpen] = useState(() => read(OPEN_KEY, 'true') === 'true')
-  const [rate, setRate] = useState(() => Number(read(RATE_KEY, '1')) || 1)
+  const [open, setOpen] = useState(() => (readString(STORAGE_KEYS.previewOpen) ?? 'true') === 'true')
+  const [rate, setRate] = useState(() => Number(readString(STORAGE_KEYS.previewRate) ?? '1') || 1)
   const [frame, setFrame] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [aspect, setAspect] = useState(16 / 9)
@@ -67,7 +59,7 @@ export function ProgramPreview() {
   function toggle() {
     const next = !open
     setOpen(next)
-    write(OPEN_KEY, String(next))
+    writeString(STORAGE_KEYS.previewOpen, String(next))
   }
 
   return (
@@ -82,7 +74,7 @@ export function ProgramPreview() {
             className="preview__rate"
             value={rate}
             title="Time between preview frames"
-            onChange={(e) => { const r = Number(e.target.value); setRate(r); write(RATE_KEY, String(r)) }}
+            onChange={(e) => { const r = Number(e.target.value); setRate(r); writeString(STORAGE_KEYS.previewRate, String(r)) }}
           >
             {RATES.map((r) => <option key={r} value={r}>every {r}s</option>)}
           </select>

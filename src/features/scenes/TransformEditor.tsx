@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { STORAGE_KEYS, readString, writeString } from '../../lib/storage'
 import { itemKey, useScenes } from '../../store/scenes'
 import { NumberField } from '../../components/NumberField'
 import { LinkIcon } from '../../components/icons'
@@ -9,7 +10,6 @@ interface Props {
   itemId: number
 }
 
-const ASPECT_KEY = 'obs-web-controller:lock-aspect'
 const nonNegInt = (n: number) => n >= 0
 const positive = (n: number) => n > 0
 
@@ -18,7 +18,7 @@ export function TransformEditor({ container, itemId }: Props) {
   const loadTransform = useScenes((s) => s.loadTransform)
   const setTransform = useScenes((s) => s.setTransform)
   const [lockAspect, setLockAspect] = useState(() => {
-    try { return localStorage.getItem(ASPECT_KEY) !== 'false' } catch { return true }
+    return readString(STORAGE_KEYS.lockAspect) !== 'false'
   })
 
   // Always fetch fresh values when the editor opens.
@@ -46,7 +46,7 @@ export function TransformEditor({ container, itemId }: Props) {
   function toggleAspect() {
     const next = !lockAspect
     setLockAspect(next)
-    try { localStorage.setItem(ASPECT_KEY, String(next)) } catch { /* ignore */ }
+    writeString(STORAGE_KEYS.lockAspect, String(next))
   }
 
   return (

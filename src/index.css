@@ -278,3 +278,18 @@ button.slides__summary:hover { border-color: #7c9cff; color: var(--text); }
 .rename__input { padding: 2px 6px; font-weight: 600; }
 .rename__error { font-size: 0.78rem; font-weight: 400; }
 input.is-invalid { border-color: var(--live); }
+
+/* ---------- export / import ---------- */
+.connect__head { gap: 8px; flex-wrap: wrap; }
+.connect__head h2 { margin-right: auto; }
+.transfer { display: contents; }
+.transfer__buttons { display: flex; gap: 6px; }
+.transfer__panel {
+  flex-basis: 100%; order: 10; display: flex; flex-direction: column; gap: 8px; padding: 8px 10px;
+  border: 1px solid #7c9cff55; border-radius: 6px; background: #7c9cff0d; font-size: 0.88rem;
+}
+.transfer__panel p { margin: 0; }
+.transfer__warning { color: #f5a524; }
+.transfer__actions { display: flex; justify-content: flex-end; gap: 6px; }
+.transfer__done { flex-basis: 100%; order: 11; margin: 0; color: var(--ok); font-size: 0.85rem; }
+.transfer > .error { flex-basis: 100%; order: 11; font-size: 0.85rem; }

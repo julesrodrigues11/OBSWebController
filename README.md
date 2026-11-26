@@ -86,7 +86,8 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - Raw settings view (`{ }`) for every source, including types without an editor
 
 **General**
-- Saved connections (name, address, port, optional saved password)
+- Saved connections (name, address, port, optional saved password), with **export and import**
+  to share them as a file
 - Live sync: changes made in OBS itself appear immediately
 - Automatic reconnection if OBS restarts or the network drops
 - Clear error messages naming the request, source and OBS error code
@@ -176,7 +177,7 @@ pages can't reach OBS without extra setup).
 
 The first screen is your list of **saved connections**.
 
-<img src="docs/images/connections.png" alt="Saved connections screen with Edit, Delete and Connect buttons" width="560">
+<img src="docs/images/connections.png" alt="Saved connections screen with Export, Import, Edit, Delete and Connect buttons" width="560">
 
 - **+ New** opens a form: name, OBS PC address, port, password.
   - **Save password in this browser**: tick to connect with one click; untick to be asked for
@@ -186,6 +187,26 @@ The first screen is your list of **saved connections**.
 - **Connect** connects using that saved connection.
 - **Edit** updates the address, port or password, for example if the OBS PC's IP changes.
 - **Delete** removes it after a confirmation.
+
+### Sharing connections (Export / Import)
+
+Saved connections live in one browser. To copy them to another computer or give them to a
+colleague, use **Export** and **Import** at the top of the connections screen.
+
+- **Export** saves all your connections to a file
+  (`obs-web-controller-connections-<date>.json`). Passwords are **left out** unless you tick
+  **Include saved passwords**; the file then holds them as plain text, so treat it like a
+  password.
+- **Import** reads such a file:
+  - Connections you don't have yet are **added**. If the file has no password for one, it
+    will ask for the password when you connect (use **Edit** to save it).
+  - If a connection has the **same name** as one of yours (capitals and spaces ignored) but a
+    different address, port or password, you're asked once: **Update them** (take the file's
+    details; your saved password is kept if the file has none), **Keep mine**, or
+    **Cancel import**.
+  - Identical connections are left alone. A summary says what was added, updated or kept.
+
+The file also has room for future settings (such as presets), so one file will carry them all.
 
 The status bar shows which connection you're on, the OBS and obs-websocket versions, and a
 **Disconnect** button. If the connection drops, a banner appears and the app reconnects by
@@ -368,8 +389,8 @@ anywhere except to OBS.
 | Saved connections | Name, address, port; password only if you ticked *Save password* |
 | Interface choices | Collapsed scenes, preview open/rate, aspect lock, source scope and type filter |
 
-Saved connections are per browser: a colleague on another computer needs to add their own.
-Clearing the browser's site data removes everything.
+Saved connections are per browser; use **Export** / **Import** to move them to another
+computer. Clearing the browser's site data removes everything.
 
 ---
 
@@ -379,6 +400,8 @@ Clearing the browser's site data removes everything.
   Always set one.
 - Saved passwords are stored **unencrypted** in browser storage. Don't save them on shared
   computers.
+- An export made with **Include saved passwords** contains them as plain text. Share or store
+  such files only where you'd write the password down.
 - The connection to OBS is unencrypted (`ws://`). Use the app on a trusted local network only.
 - **Never forward port 4455 to the internet.** For remote access, use a VPN such as Tailscale or
   WireGuard instead.
@@ -430,10 +453,15 @@ Clearing the browser's site data removes everything.
 src/
   obs/        client, error helpers, kind labels, transform maths, value helpers (paths, colours)
   store/      connection, profiles (saved connections), scenes, inputs (source settings),
-              live (on-air calculations), names (unique names), ui (source scope)
-  components/ shared UI: fields, number field, confirm bar, icons, connect screen, status bar
+              live (on-air calculations), names (unique names), ui (source scope),
+              settingsFile (export/import file format)
+  lib/        storage.ts (safe browser-storage helpers, list of stored keys), download.ts
+  components/ shared UI: fields, number field, confirm bar, icons, connect screen (with
+              export/import), status bar
   features/
-    scenes/   Scenes panel, preview, transform editor, add-source, new-scene and rename forms
+    scenes/   ScenesPanel → SceneSection (one scene) → SceneHeader + ItemRow (one item) →
+              OrderButtons; plus preview, transform editor, add-source, new-scene and rename
+              forms, the filter rules (rows.ts) and collapsed state (useCollapsed.ts)
     sources/  Sources panel, per-type rows, slideshow file editor, raw/other rows
 tests/
   mock/       a fake OBS (obs-websocket server) with demo scenes and sources
@@ -487,11 +515,12 @@ and it can fail requests or drop connections on purpose.
 
 | Folder / file | What's tested |
 |---|---|
-| `tests/unit/` | Pure logic: size↔scale maths, colour and path conversion, on-air rules, choosing source types, unique names, error messages |
+| `tests/unit/` | Pure logic: size↔scale maths, colour and path conversion, on-air rules, choosing source types, unique names, error messages, scene filter rules, safe storage, export/import file handling |
 | `tests/app/connection.test.tsx` | Connecting, wrong password, unreachable OBS, automatic reconnection, old-OBS warning, saved connections |
 | `tests/app/scenes.test.tsx` | Scene/item order, visibility, Go live, ordering, transform editor, filter, preview |
 | `tests/app/sources.test.tsx` | Editing every source type, apply/cancel rules, slideshow list, media controls, live sync, partial load failures, scope and filters |
 | `tests/app/manage.test.tsx` | Adding, removing and deleting sources; creating, renaming and deleting scenes |
+| `tests/app/transfer.test.tsx` | Exporting (with/without passwords) and importing connections, including the update-or-keep question and bad files |
 
 App tests use [Testing Library](https://testing-library.com/) to click and type like a person
 would, in a simulated browser ([jsdom](https://github.com/jsdom/jsdom)), run by

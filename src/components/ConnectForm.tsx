@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type KeyboardEvent } from 'react'
 import { useConnection } from '../store/connection'
 import { EyeIcon, EyeOffIcon } from './icons'
+import { SettingsTransfer } from './SettingsTransfer'
 import { newProfileId, useProfiles, type Profile } from '../store/profiles'
 
 /** Connect using a saved profile. `password` overrides the stored one (for profiles that don't save it). */
@@ -51,6 +52,7 @@ export function ConnectForm() {
     <div className="connect">
       <div className="connect__head">
         <h2>Connections</h2>
+        <SettingsTransfer disabled={busy} />
         <button className="button--small" onClick={() => setEditing(blankProfile())} disabled={busy}>
           + New
         </button>
@@ -103,7 +105,7 @@ export function ConnectForm() {
 
       <p className="hint">
         In OBS: Tools → WebSocket Server Settings → enable the server. “Show Connect Info” there gives the IP and
-        password. Connections are saved in this browser only.
+        password. Connections are saved in this browser only; use Export to copy them to another one.
       </p>
     </div>
   )

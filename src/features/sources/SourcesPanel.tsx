@@ -6,16 +6,11 @@ import { useScenes } from '../../store/scenes'
 import { useUi } from '../../store/ui'
 import { BrowserRow, ImageRow, MediaRow, SlideshowRow, TextRow } from './rows'
 import { OtherRow } from './OtherRow'
+import { STORAGE_KEYS, readJson, writeJson } from '../../lib/storage'
 
 type TypeKey = Category | 'other'
-const TYPES_KEY = 'obs-web-controller:source-types'
-
-function loadTypes(): Set<TypeKey> {
-  try { return new Set(JSON.parse(localStorage.getItem(TYPES_KEY) ?? '[]')) } catch { return new Set() }
-}
-function saveTypes(s: Set<TypeKey>) {
-  try { localStorage.setItem(TYPES_KEY, JSON.stringify([...s])) } catch { /* ignore */ }
-}
+const loadTypes = () => new Set(readJson<TypeKey[]>(STORAGE_KEYS.sourceTypes, []))
+const saveTypes = (s: Set<TypeKey>) => writeJson(STORAGE_KEYS.sourceTypes, [...s])
 
 interface SectionDef {
   category: Category

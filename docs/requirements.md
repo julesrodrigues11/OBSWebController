@@ -88,13 +88,28 @@ Status: decisions agreed in discussion so far. Open questions at the end.
 
 ## Testing (built)
 - Vitest + Testing Library + jsdom; a fake obs-websocket server (`tests/mock`) with demo content,
-  request log, failure injection and connection drops. 98 tests (unit + app).
+  request log, failure injection and connection drops. 127 tests (unit + app).
 - GitHub Actions CI on every push: npm ci, typecheck, lint, test, build (Node 22, Ubuntu).
 - Real-OBS behaviour is checked by hand: `docs/manual-test-checklist.md`.
 - Minimum Node.js 22.12 (Vitest). jsdom kept at 28: jsdom 30+ needs Node 22.22+/24.15+ and fails on
   older Node 22 with "Cannot read properties of undefined (reading 'bind')".
 - Found by the tests: the connection form's Port field snapped back to 4455 when cleared (fixed:
   the field now holds text and is validated on save).
+
+## Export / import (built)
+- "Export" / "Import" on the connections screen. JSON file: `{ app: "obs-web-controller",
+  kind: "settings", version: 1, exportedAt, connections: [{ name, host, port, password? }] }`;
+  room for presets later. Newer-version files are refused with a clear message.
+- Passwords left out unless "Include saved passwords" is ticked (plain-text warning shown);
+  passwords that weren't saved are never exported.
+- Import matches by name (case/space-insensitive): new ones added (asking for a password if
+  none in the file); differing ones → one question: Update them / Keep mine / Cancel import;
+  identical ones left alone. Updating keeps the saved password if the file has none.
+
+## Code structure
+- ScenesPanel split (Nov 2026) into SceneSection, SceneHeader, ItemRow, OrderButtons, with
+  panel-wide state in panelState.ts, filter rules in rows.ts and useCollapsed.ts; browser storage
+  goes through src/lib/storage.ts. Behaviour unchanged (all tests passed unmodified).
 
 ## Later
 - Advanced Scene Switcher integration (trigger macros via websocket messages).
