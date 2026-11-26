@@ -10,7 +10,7 @@ import { createAppServer, loadConfig } from '../../host/server.mjs'
 const base = mkdtempSync(join(tmpdir(), 'owc-'))
 const app = join(base, 'app')
 mkdirSync(join(app, 'assets'), { recursive: true })
-writeFileSync(join(app, 'index.html'), '<!doctype html><title>OBS Web Controller</title>')
+writeFileSync(join(app, 'index.html'), '<!doctype html><title>Stagehand</title>')
 writeFileSync(join(app, 'assets', 'index-abc123.js'), 'console.log(1)')
 writeFileSync(join(base, 'secret.txt'), 'do not serve')
 
@@ -28,7 +28,7 @@ describe('serving the app', () => {
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toBe('text/html; charset=utf-8')
     expect(res.headers.get('cache-control')).toBe('no-cache')
-    expect(await res.text()).toContain('OBS Web Controller')
+    expect(await res.text()).toContain('Stagehand')
   })
 
   test('built assets with the right type, cached long-term (their names change each build)', async () => {
@@ -39,7 +39,7 @@ describe('serving the app', () => {
 
   test('host.json tells the app it is hosted, with version and OBS details', async () => {
     expect(await (await fetch(`${url}/host.json`)).json()).toEqual({
-      app: 'obs-web-controller', version: '1.2.3', obsHost: 'same', obsPort: 4455,
+      app: 'stagehand-obs', version: '1.2.3', obsHost: 'same', obsPort: 4455,
     })
   })
 

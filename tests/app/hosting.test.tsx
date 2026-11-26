@@ -8,7 +8,7 @@ import { hostJson } from '../setup'
 import pkg from '../../package.json'
 
 const json = (data: object) => () => Promise.resolve(new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } }))
-const hostedAs = (obsHost: string | null, obsPort = 4455) => { hostJson.response = json({ app: 'obs-web-controller', version: '0.1.0', obsHost, obsPort }) }
+const hostedAs = (obsHost: string | null, obsPort = 4455) => { hostJson.response = json({ app: 'stagehand-obs', version: '0.1.0', obsHost, obsPort }) }
 const field = (label: string) => screen.getByText(label, { selector: 'label > span' }).parentElement!.querySelector('input') as HTMLInputElement
 
 /** Render with no saved connections, so the "New connection" form opens straight away. */
@@ -60,6 +60,7 @@ describe('new connections when hosted', () => {
 
   test('a slow answer never overwrites what the user has typed', async () => {
     let answer!: () => void
+    // (Uses the pre-rename app name, so this also checks an older host server is still recognised.)
     hostJson.response = () => new Promise((r) => { answer = () => r(new Response(JSON.stringify({ app: 'obs-web-controller', obsHost: 'same', obsPort: 4460 }))) })
     const { user } = await renderApp()
     useProfiles.setState({ profiles: [], lastUsedId: null })

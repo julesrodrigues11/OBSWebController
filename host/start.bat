@@ -1,6 +1,6 @@
 @echo off
-rem Starts OBS Web Controller's web server. Keep the window open while the app is in use.
-title OBS Web Controller
+rem Starts Stagehand's web server. Keep the window open while the app is in use.
+title Stagehand
 cd /d "%~dp0"
 
 where node >nul 2>nul

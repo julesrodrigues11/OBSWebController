@@ -1,6 +1,11 @@
-# OBS Web Controller
+<img src="public/favicon.svg" alt="" width="56" align="left">
 
-[![CI](https://github.com/julesrodrigues11/OBSWebController/actions/workflows/ci.yml/badge.svg)](https://github.com/julesrodrigues11/OBSWebController/actions/workflows/ci.yml)
+# Stagehand
+
+**A web controller for OBS Studio.**
+<br clear="left">
+
+[![CI](https://github.com/julesrodrigues11/stagehand-obs/actions/workflows/ci.yml/badge.svg)](https://github.com/julesrodrigues11/stagehand-obs/actions/workflows/ci.yml)
 
 A browser-based remote control for [OBS Studio](https://obsproject.com/), built on the
 obs-websocket v5 protocol that ships with OBS 28 and later. Run it on any computer on the same
@@ -13,13 +18,13 @@ It is designed desktop-first, for dense screens where you want everything visibl
 > **Unofficial.** This project is not affiliated with or endorsed by the OBS Project.
 > "OBS" and "OBS Studio" are trademarks of the OBS Project.
 
-![OBS Web Controller: Scenes panel with live preview on the left, Sources tables for the live scene on the right](docs/images/main.png)
+![Stagehand: Scenes panel with live preview on the left, Sources tables for the live scene on the right](docs/images/main.png)
 
 <sub>Screenshots use invented demo content.</sub>
 
 ## What it is (and isn't) for
 
-OBS Web Controller is meant to **augment** OBS during a live session: the quick, frequent
+Stagehand is meant to **augment** OBS during a live session: the quick, frequent
 changes you'd otherwise have to make by reaching over to the OBS machine and clicking through
 property windows, such as switching scenes, showing or hiding sources, swapping a URL, file or
 caption, nudging a position, or adding a source on the fly.
@@ -156,20 +161,20 @@ same way in each case, because the browser always talks to OBS directly.
 
 ## Hosting on the OBS PC
 
-Each [release](https://github.com/julesrodrigues11/OBSWebController/releases) has a zip,
-`obs-web-controller-v<version>-windows.zip`, containing the built app and a small web server.
+Each [release](https://github.com/julesrodrigues11/stagehand-obs/releases) has a zip,
+`stagehand-obs-v<version>-windows.zip`, containing the built app and a small web server.
 
 **First-time setup** (once, on the OBS PC):
 
 1. Install [Node.js](https://nodejs.org/) LTS if it isn't already.
 2. Download the zip from the latest release. Right-click it → **Properties** → tick **Unblock** →
-   **OK** (avoids Windows security prompts), then extract the `obs-web-controller` folder
-   somewhere permanent, e.g. `C:\OBS Web Controller\`.
+   **OK** (avoids Windows security prompts), then extract the `stagehand-obs` folder
+   somewhere permanent, e.g. `C:\Stagehand\`.
 3. Right-click **`add-firewall-rule.bat`** → **Run as administrator**. This allows other PCs to
    reach the app (port 8080) and OBS's WebSocket server (port 4455) on private networks.
 4. Double-click **`start.bat`**. Its window shows the addresses to use, for example:
    ```
-   OBS Web Controller v0.1.0 is running.
+   Stagehand v0.3.0 is running.
      On this PC:        http://localhost:8080
      From other PCs:    http://192.168.1.50:8080
    ```
@@ -190,12 +195,18 @@ the OBS PC's address filled in, so they only enter the OBS WebSocket password.
 
 **Updating:** close the `start.bat` window, download the new release zip (unblock it as before),
 replace the folder's contents (keep `host-config.json` if you changed it), and start it again.
-Users just reload the page; their saved connections stay in their browsers.
+Users just reload the page; their saved connections stay in their browsers (as long as the
+address and port stay the same: browsers keep a separate list per address).
+
+**Updating from OBS Web Controller** (the app's name up to v0.2): the folder is now called
+`stagehand-obs`. After replacing it, run `install-autostart.bat` again if you use it, and
+`add-firewall-rule.bat` as administrator; both remove the old-named shortcut and firewall rules.
+Connections files exported under the old name still import.
 
 The zip also contains `README-host.txt` with these steps, for the OBS PC itself.
 
 To build the same package yourself from source: `npm run package` (creates
-`release/obs-web-controller/`). To try the host server locally on a build: `npm run build`, then
+`release/stagehand-obs/`). To try the host server locally on a build: `npm run build`, then
 `npm run serve` (serves `dist/` at `http://localhost:8080`).
 
 ---
@@ -254,7 +265,7 @@ Saved connections live in one browser. To copy them to another computer or give 
 colleague, use **Export** and **Import** at the top of the connections screen.
 
 - **Export** saves all your connections to a file
-  (`obs-web-controller-connections-<date>.json`). Passwords are **left out** unless you tick
+  (`stagehand-connections-<date>.json`). Passwords are **left out** unless you tick
   **Include saved passwords**; the file then holds them as plain text, so treat it like a
   password.
 - **Import** reads such a file:
@@ -666,7 +677,7 @@ with a message if the Unreleased section is empty.
 Pushing the tag starts the **Release** workflow (`.github/workflows/release.yml`) on GitHub. It
 checks the tag matches `package.json`, runs the type-check, lint and tests, builds the hosting
 package, zips it, and publishes a **Release** on the repository's
-[Releases page](https://github.com/julesrodrigues11/OBSWebController/releases) with the
+[Releases page](https://github.com/julesrodrigues11/stagehand-obs/releases) with the
 changelog notes and the zip attached. Watch it on the **Actions** tab; it takes a few minutes.
 
 If the release workflow fails, nothing is published. Fix the problem, then either delete the tag

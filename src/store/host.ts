@@ -23,7 +23,7 @@ export async function loadHostInfo() {
   try {
     const res = await fetch('./host.json', { cache: 'no-cache' })
     const data = res.ok ? ((await res.json()) as Partial<HostInfo> & { app?: string }) : null
-    if (data?.app === 'obs-web-controller') {
+    if ((data?.app === 'stagehand-obs' || data?.app === 'obs-web-controller')) {
       useHost.setState({
         info: {
           version: String(data.version ?? ''),

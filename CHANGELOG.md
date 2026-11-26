@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to OBS Web Controller are listed here, newest first.
+All notable changes to Stagehand (formerly OBS Web Controller) are listed here, newest first.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow
 [Semantic Versioning](https://semver.org/): **MAJOR** for changes that break existing use,
 **MINOR** for new features, **PATCH** for fixes.
@@ -9,6 +9,17 @@ Add changes under **Unreleased** as they're made. `npm version` moves them into 
 section when a release is made (see "Releasing" in the README).
 
 ## [Unreleased]
+
+### Changed
+
+- The app is now called **Stagehand** (formerly OBS Web Controller), with its own icon. The
+  release zip and folder are now `stagehand-obs`, and exported connections files are named
+  `stagehand-connections-<date>.json`.
+- Updating a hosted copy: run `install-autostart.bat` and `add-firewall-rule.bat` again; they
+  replace the old-named start-up shortcut and firewall rules.
+
+Nothing is lost when updating: saved connections and settings stay in each browser, and
+connections files exported under the old name still import.
 
 ## [0.2.0] - 2026-11-26
 

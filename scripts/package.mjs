@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Assemble the hosting package: release/obs-web-controller/ containing the built app and the
+ * Assemble the hosting package: release/stagehand-obs/ containing the built app and the
  * host files. Run `npm run package` (which builds first). The release workflow zips this folder.
  */
 import { cpSync, existsSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs'
@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const { version } = JSON.parse(readFileSync(`${root}package.json`, 'utf8'))
-const out = `${root}release/obs-web-controller`
+const out = `${root}release/stagehand-obs`
 
 if (!existsSync(`${root}dist/index.html`)) {
   console.error('Error: no build found in dist/. Run `npm run build` first (or use `npm run package`).')
@@ -23,4 +23,4 @@ for (const f of ['server.mjs', 'start.bat', 'install-autostart.bat', 'remove-aut
 }
 writeFileSync(`${out}/README-host.txt`, readFileSync(`${root}host/README-host.txt`, 'utf8').replace('{{VERSION}}', `v${version}`).replace(/\r?\n/g, '\r\n'))
 writeFileSync(`${out}/VERSION`, `${version}\n`)
-console.log(`Packaged v${version} in release/obs-web-controller/`)
+console.log(`Packaged v${version} in release/stagehand-obs/`)

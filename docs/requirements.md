@@ -97,7 +97,7 @@ Status: decisions agreed in discussion so far. Open questions at the end.
   the field now holds text and is validated on save).
 
 ## Export / import (built)
-- "Export" / "Import" on the connections screen. JSON file: `{ app: "obs-web-controller",
+- "Export" / "Import" on the connections screen. JSON file: `{ app: "stagehand-obs" (older files: "obs-web-controller", still accepted),
   kind: "settings", version: 1, exportedAt, connections: [{ name, host, port, password? }] }`;
   room for presets later. Newer-version files are refused with a clear message.
 - Passwords left out unless "Include saved passwords" is ticked (plain-text warning shown);
@@ -127,7 +127,7 @@ Status: decisions agreed in discussion so far. Open questions at the end.
 - Windows scripts (CRLF via .gitattributes): start.bat (checks Node), install/remove-autostart
   (Startup-folder shortcut, minimised), add-firewall-rule.bat (admin; app + OBS ports, private
   profile). Start-on-login chosen over a Windows service (OBS PC is usually logged in).
-- Package: release/obs-web-controller/{app/, server.mjs, *.bat, host-config.json,
+- Package: release/stagehand-obs/{app/, server.mjs, *.bat, host-config.json,
   README-host.txt, VERSION}; zip ~110 KB.
 - When hosted, new connections pre-fill the OBS address ("same" = the page's hostname) and port;
   fields the user typed are never overwritten; existing connections aren't affected.

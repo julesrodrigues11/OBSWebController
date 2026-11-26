@@ -1,10 +1,11 @@
-OBS Web Controller {{VERSION}}: hosting package
-=================================================
+Stagehand {{VERSION}}: hosting package
+======================================
+A web controller for OBS Studio.
 
-This folder lets you host OBS Web Controller on a Windows PC (normally the OBS PC), so anyone on
+This folder lets you host Stagehand on a Windows PC (normally the OBS PC), so anyone on
 the local network can use it by opening a web address. Nothing is installed on their computers.
 
-Full documentation: https://github.com/julesrodrigues11/OBSWebController
+Full documentation: https://github.com/julesrodrigues11/stagehand-obs
 
 
 FIRST-TIME SETUP (on the PC that will host it)
@@ -13,7 +14,7 @@ FIRST-TIME SETUP (on the PC that will host it)
    Check with:  node -v   in a Command Prompt.
 2. Before extracting the zip: right-click it > Properties > tick "Unblock" > OK. (Windows flags
    downloaded files; unblocking avoids security prompts when running the .bat files.)
-   Then put the "obs-web-controller" folder somewhere permanent, e.g. C:\OBS Web Controller\
+   Then put the "stagehand-obs" folder somewhere permanent, e.g. C:\Stagehand\
 3. Right-click add-firewall-rule.bat > "Run as administrator".
    This allows other PCs to reach the app (port 8080) and OBS's WebSocket server (port 4455).
 4. In OBS: Tools > WebSocket Server Settings > enable the server and set a password.
@@ -51,6 +52,11 @@ UPDATING
 3. Replace this folder's contents with the new ones. Keep your host-config.json if you changed it.
 4. Start it again. Users just reload the page.
 Saved connections are kept: they're stored in each user's browser, not in this folder.
+(Keep the same address and port: browsers keep a separate list for each address.)
+
+Updating from OBS Web Controller (the app's old name, v0.2 or earlier): the folder is now
+called "stagehand-obs". After replacing it, run install-autostart.bat again if you use it,
+and add-firewall-rule.bat as administrator. Both remove the old-named shortcut and rules.
 
 
 TROUBLESHOOTING

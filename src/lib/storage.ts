@@ -8,6 +8,8 @@
 
 /** Every key the app stores, in one place. */
 export const STORAGE_KEYS = {
+  // These keys keep the app's original name (OBS Web Controller) on purpose: renaming them
+  // would make every browser lose its saved connections and settings. Users never see them.
   profiles: 'obs-web-controller:profiles',
   legacyConnection: 'obs-web-controller:connection', // from early versions; migrated into profiles
   collapsedScenes: 'obs-web-controller:collapsed-scenes',

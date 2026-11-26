@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * OBS Web Controller: a small web server for hosting the app on the OBS PC (or any PC).
+ * Stagehand: a small web server for hosting the app on the OBS PC (or any PC).
  * Uses only Node.js's built-in modules, so there's nothing to install apart from Node itself.
  *
  *   node server.mjs [--port 8080] [--dir ./app]
@@ -69,7 +69,7 @@ export function createAppServer({ dir, version = 'unknown', obsHost = 'same', ob
 
     // Tells the app it's being served by this host, so it can suggest the OBS address.
     if (path === '/host.json') {
-      return send(200, JSON.stringify({ app: 'obs-web-controller', version, obsHost, obsPort }), {
+      return send(200, JSON.stringify({ app: 'stagehand-obs', version, obsHost, obsPort }), {
         'Content-Type': TYPES['.json'],
         'Cache-Control': 'no-cache',
       })
@@ -151,7 +151,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     process.exit(1)
   })
   server.listen(port, '0.0.0.0', () => {
-    console.log(`OBS Web Controller v${version} is running.`)
+    console.log(`Stagehand v${version} is running.`)
     console.log(`  On this PC:        http://localhost:${port}`)
     for (const ip of lanAddresses()) console.log(`  From other PCs:    http://${ip}:${port}`)
     console.log('Keep this window open while it is in use. Close it (or press Ctrl+C) to stop.')

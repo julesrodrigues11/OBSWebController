@@ -29,7 +29,7 @@ async function setup(profiles: Profile[]) {
 }
 const fileInput = () => screen.getByTestId('import-file') as HTMLInputElement
 const settingsFile = (connections: object[]) =>
-  new File([JSON.stringify({ app: 'obs-web-controller', kind: 'settings', version: 1, connections })], 'settings.json', { type: 'application/json' })
+  new File([JSON.stringify({ app: 'stagehand-obs', kind: 'settings', version: 1, connections })], 'settings.json', { type: 'application/json' })
 
 describe('export', () => {
   test('downloads a file without passwords by default', async () => {
@@ -38,7 +38,7 @@ describe('export', () => {
     expect((screen.getByLabelText('Include saved passwords') as HTMLInputElement).checked).toBe(false)
     await user.click(screen.getByRole('button', { name: 'Download file' }))
     expect(downloaded).toHaveLength(1)
-    expect(downloaded[0].name).toMatch(/^obs-web-controller-connections-\d{4}-\d{2}-\d{2}\.json$/)
+    expect(downloaded[0].name).toMatch(/^stagehand-connections-\d{4}-\d{2}-\d{2}\.json$/)
     const content = JSON.parse(await downloaded[0].blob.text())
     expect(content.connections).toEqual([{ name: 'Studio PC', host: '192.168.1.50', port: 4455 }])
     expect(screen.getByRole('status').textContent).toMatch(/Exported 1 connection/)
@@ -104,7 +104,7 @@ describe('import', () => {
   test('a file that isn’t a settings file shows why', async () => {
     const { user } = await setup([saved({ name: 'Studio PC' })])
     await user.upload(fileInput(), new File(['{"something":"else"}'], 'other.json', { type: 'application/json' }))
-    expect((await screen.findByText(/isn’t an OBS Web Controller settings file/)).className).toBe('error')
+    expect((await screen.findByText(/isn’t a Stagehand connections file/)).className).toBe('error')
     expect(useProfiles.getState().profiles).toHaveLength(1)
   })
 

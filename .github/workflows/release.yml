@@ -52,9 +52,9 @@ jobs:
       - name: Zip it
         run: |
           cd release
-          zip -r -q "../obs-web-controller-v${VERSION}-windows.zip" obs-web-controller
+          zip -r -q "../stagehand-obs-v${VERSION}-windows.zip" stagehand-obs
           cd ..
-          ls -l "obs-web-controller-v${VERSION}-windows.zip"
+          ls -l "stagehand-obs-v${VERSION}-windows.zip"
 
       - name: Release notes from CHANGELOG.md
         run: |
@@ -63,7 +63,7 @@ jobs:
 
           ---
 
-          **Hosting on a PC:** download `obs-web-controller-v*-windows.zip` below, unblock it
+          **Hosting on a PC:** download `stagehand-obs-v*-windows.zip` below, unblock it
           (right-click > Properties > Unblock), extract it, and follow `README-host.txt` inside.
           NOTES
           cat notes.md
@@ -74,5 +74,5 @@ jobs:
         run: |
           PRERELEASE=""
           case "${VERSION}" in *-*) PRERELEASE="--prerelease" ;; esac
-          gh release create "${GITHUB_REF_NAME}" "obs-web-controller-v${VERSION}-windows.zip" \
-            --title "v${VERSION}" --notes-file notes.md ${PRERELEASE}
+          gh release create "${GITHUB_REF_NAME}" "stagehand-obs-v${VERSION}-windows.zip" \
+            --title "Stagehand v${VERSION}" --notes-file notes.md ${PRERELEASE}

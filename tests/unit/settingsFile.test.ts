@@ -12,7 +12,7 @@ describe('export', () => {
   test('leaves passwords out by default', () => {
     const file = buildExport(profiles, false, new Date('2026-11-26T12:00:00Z'))
     expect(file).toEqual({
-      app: 'obs-web-controller', kind: 'settings', version: 1, exportedAt: '2026-11-26T12:00:00.000Z',
+      app: 'stagehand-obs', kind: 'settings', version: 1, exportedAt: '2026-11-26T12:00:00.000Z',
       connections: [
         { name: 'Studio PC', host: '192.168.1.50', port: 4455 },
         { name: 'Laptop', host: '10.0.0.5', port: 4455 },
@@ -27,21 +27,26 @@ describe('export', () => {
   })
 
   test('file name includes the date', () => {
-    expect(exportFileName(new Date('2026-11-26T12:00:00Z'))).toBe('obs-web-controller-connections-2026-11-26.json')
+    expect(exportFileName(new Date('2026-11-26T12:00:00Z'))).toBe('stagehand-connections-2026-11-26.json')
   })
 })
 
 describe('reading a file', () => {
-  const file = (connections: unknown[], extra = {}) => JSON.stringify({ app: 'obs-web-controller', kind: 'settings', version: 1, connections, ...extra })
+  const file = (connections: unknown[], extra = {}) => JSON.stringify({ app: 'stagehand-obs', kind: 'settings', version: 1, connections, ...extra })
 
   test('round-trips what export writes', () => {
     const exported = JSON.stringify(buildExport([profile('Studio PC')], true))
     expect(parseImport(exported).connections).toEqual([{ name: 'Studio PC', host: '192.168.1.50', port: 4455, password: 'secret' }])
   })
 
+  test('files exported before the rename (as OBS Web Controller) still import', () => {
+    const old = JSON.stringify({ app: 'obs-web-controller', kind: 'settings', version: 1, connections: [{ name: 'Studio PC', host: '192.168.1.50', port: 4455 }] })
+    expect(parseImport(old).connections.map((c) => c.name)).toEqual(['Studio PC'])
+  })
+
   test('explains what is wrong with bad files', () => {
     expect(() => parseImport('not json')).toThrow(/isn’t valid JSON/)
-    expect(() => parseImport('{"hello":1}')).toThrow(/isn’t an OBS Web Controller settings file/)
+    expect(() => parseImport('{"hello":1}')).toThrow(/isn’t a Stagehand connections file/)
     expect(() => parseImport(file([], { version: 99 }))).toThrow(/newer version/)
     expect(() => parseImport(file([]))).toThrow(/no connections/)
   })

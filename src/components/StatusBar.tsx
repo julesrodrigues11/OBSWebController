@@ -20,7 +20,7 @@ export function StatusBar() {
   return (
     <header className="topbar">
       <h1>
-        OBS Web Controller <span className="topbar__version" title="App version">v{APP_VERSION}</span>
+        Stagehand <span className="topbar__version" title="App version">v{APP_VERSION}</span>
       </h1>
       <div className="topbar__right">
         {online && (

@@ -3,7 +3,7 @@
  *
  * File format (version 1):
  *   {
- *     "app": "obs-web-controller",
+ *     "app": "stagehand-obs",
  *     "kind": "settings",
  *     "version": 1,
  *     "exportedAt": "2026-11-26T12:00:00.000Z",
@@ -14,7 +14,9 @@
  */
 import { newProfileId, type Profile } from './profiles'
 
-export const FILE_APP = 'obs-web-controller'
+export const FILE_APP = 'stagehand-obs'
+/** Files exported before the rename (as OBS Web Controller, up to v0.2) are still accepted. */
+const ACCEPTED_APPS: unknown[] = [FILE_APP, 'obs-web-controller']
 export const FILE_VERSION = 1
 
 export interface ExportedConnection {
@@ -49,7 +51,7 @@ export function buildExport(profiles: Profile[], includePasswords: boolean, now 
 }
 
 export function exportFileName(now = new Date()) {
-  return `obs-web-controller-connections-${now.toISOString().slice(0, 10)}.json`
+  return `stagehand-connections-${now.toISOString().slice(0, 10)}.json`
 }
 
 /** Thrown with a message that can be shown to the user as-is. */
@@ -70,11 +72,11 @@ export function parseImport(text: string): ParsedImport {
     throw new ImportError('That file isn’t valid JSON.')
   }
   const d = data as Partial<SettingsFile> | null
-  if (!d || typeof d !== 'object' || d.app !== FILE_APP) {
-    throw new ImportError('That file isn’t an OBS Web Controller settings file.')
+  if (!d || typeof d !== 'object' || !ACCEPTED_APPS.includes(d.app)) {
+    throw new ImportError('That file isn’t a Stagehand connections file.')
   }
   if (typeof d.version !== 'number' || d.version > FILE_VERSION) {
-    throw new ImportError('That file was made by a newer version of OBS Web Controller. Update the app to import it.')
+    throw new ImportError('That file was made by a newer version of Stagehand. Update the app to import it.')
   }
   const list = Array.isArray(d.connections) ? d.connections : []
   const connections: ExportedConnection[] = []
