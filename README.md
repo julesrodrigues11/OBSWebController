@@ -64,6 +64,7 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - [Development](#development)
 - [Testing](#testing)
 - [Releasing](#releasing)
+- [Licence](#licence)
 
 ---
 
@@ -683,3 +684,9 @@ changelog notes and the zip attached. Watch it on the **Actions** tab; it takes 
 If the release workflow fails, nothing is published. Fix the problem, then either delete the tag
 (`git tag -d v0.2.0` and `git push --delete origin v0.2.0`) and release again, or release the
 fix as the next patch version.
+
+## Licence
+
+Stagehand is released under the [MIT Licence](LICENSE): you're free to use, copy, change and
+share it, including commercially, as long as the copyright notice and licence text stay with
+it. It comes with no warranty. The hosting zip includes the licence as `LICENSE.txt`.

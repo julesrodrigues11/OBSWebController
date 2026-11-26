@@ -10,6 +10,11 @@ section when a release is made (see "Releasing" in the README).
 
 ## [Unreleased]
 
+### Added
+
+- The project is now released under the **MIT Licence** (`LICENSE`); the hosting zip includes it
+  as `LICENSE.txt`.
+
 ## [0.3.0] - 2026-11-26
 
 ### Changed

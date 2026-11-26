@@ -22,5 +22,6 @@ for (const f of ['server.mjs', 'start.bat', 'install-autostart.bat', 'remove-aut
   cpSync(`${root}host/${f}`, `${out}/${f}`)
 }
 writeFileSync(`${out}/README-host.txt`, readFileSync(`${root}host/README-host.txt`, 'utf8').replace('{{VERSION}}', `v${version}`).replace(/\r?\n/g, '\r\n'))
+cpSync(`${root}LICENSE`, `${out}/LICENSE.txt`)
 writeFileSync(`${out}/VERSION`, `${version}\n`)
 console.log(`Packaged v${version} in release/stagehand-obs/`)
