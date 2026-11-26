@@ -50,6 +50,7 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - [Requirements](#requirements)
 - [Setting up OBS](#setting-up-obs)
 - [Hosting on the OBS PC](#hosting-on-the-obs-pc)
+  - [Hosting on macOS or Linux](#hosting-on-macos-or-linux)
 - [Running from source](#running-from-source)
 - [Connecting](#connecting)
 - [Using the app](#using-the-app)
@@ -163,7 +164,9 @@ same way in each case, because the browser always talks to OBS directly.
 ## Hosting on the OBS PC
 
 Each [release](https://github.com/julesrodrigues11/stagehand-obs/releases) has a zip,
-`stagehand-obs-v<version>-windows.zip`, containing the built app and a small web server.
+`stagehand-obs-v<version>-windows.zip`, containing the built app and a small web server. The
+steps below are for Windows; for a Mac or Linux PC, see
+[Hosting on macOS or Linux](#hosting-on-macos-or-linux).
 
 **First-time setup** (once, on the OBS PC):
 
@@ -205,6 +208,61 @@ address and port stay the same: browsers keep a separate list per address).
 Connections files exported under the old name still import.
 
 The zip also contains `README-host.txt` with these steps, for the OBS PC itself.
+
+### Hosting on macOS or Linux
+
+The app works in any modern browser on any system, and OBS can run on any system too. Only the
+helper scripts in the zip (`start.bat`, `install-autostart.bat`, `remove-autostart.bat`,
+`add-firewall-rule.bat`) are **Windows-only**. The web server itself (`server.mjs`) runs anywhere
+Node.js 22.12 or newer does. (It's tested on Linux; macOS should behave the same but hasn't been
+tested yet.)
+
+1. Install [Node.js](https://nodejs.org/) LTS, then download the same release zip and extract the
+   `stagehand-obs` folder somewhere permanent. (There's nothing to unblock.)
+2. Start the server from a terminal, and keep the terminal open while the app is in use (Ctrl+C
+   stops it):
+   ```
+   cd path/to/stagehand-obs
+   node server.mjs
+   ```
+   It prints the same addresses as on Windows. `host-config.json` works the same way, and
+   `node server.mjs --port 9000` overrides the port for one run.
+3. **Firewall:** allow incoming connections on port **8080** (Stagehand) and, on the PC running
+   OBS, **4455** (OBS WebSocket).
+   - **macOS:** if the firewall is on, click **Allow** when asked whether `node` may accept
+     incoming connections. OBS may ask the same.
+   - **Linux** with ufw: `sudo ufw allow 8080/tcp` (and `sudo ufw allow 4455/tcp` on the OBS PC).
+4. **Starting at log-in (optional):**
+   - **macOS:** create a file `start-stagehand.command` in the folder containing
+     ```
+     #!/bin/zsh
+     cd "$(dirname "$0")"
+     node server.mjs
+     ```
+     make it runnable with `chmod +x start-stagehand.command`, and add it under
+     *System Settings → General → Login Items*. It opens a Terminal window at log-in.
+   - **Linux:** a systemd service, e.g. `/etc/systemd/system/stagehand.service`:
+     ```
+     [Unit]
+     Description=Stagehand web server
+     After=network-online.target
+     Wants=network-online.target
+
+     [Service]
+     ExecStart=/usr/bin/node /opt/stagehand-obs/server.mjs
+     Restart=on-failure
+     User=your-user-name
+
+     [Install]
+     WantedBy=multi-user.target
+     ```
+     Adjust the paths (`which node` shows Node's), then
+     `sudo systemctl enable --now stagehand`.
+
+**On a Mac running macOS 15 or newer**, the browser may ask for permission to find devices on
+your local network the first time you connect to OBS. Allow it, or Stagehand can't reach OBS
+(*System Settings → Privacy & Security → Local Network* if you missed the prompt).
+
 
 To build the same package yourself from source: `npm run package` (creates
 `release/stagehand-obs/`). To try the host server locally on a build: `npm run build`, then
@@ -493,7 +551,7 @@ Found a security problem? Please report it privately, as described in [SECURITY.
 
 | Problem | Things to check |
 |---|---|
-| *Could not reach OBS* | Correct IP and port? WebSocket server enabled in OBS? Windows Firewall allowing inbound TCP 4455 on the OBS PC? Both machines on the same network? |
+| *Could not reach OBS* | Correct IP and port? WebSocket server enabled in OBS? Windows Firewall allowing inbound TCP 4455 on the OBS PC? Both machines on the same network? On macOS 15+, has the browser been allowed *Local Network* access (System Settings → Privacy & Security)? |
 | *Wrong password* | Re-check in OBS via *Show Connect Info*; use the eye button to see what you typed |
 | Connection works locally but not from a hosted HTTPS page | Browsers block `ws://` from `https://` pages, and Chromium browsers also ask permission before a public site can reach your local network. Serve the app over plain HTTP on your LAN, or put a TLS proxy in front of obs-websocket and use `wss://`. |
 | A source shows *Couldn't read settings* | The message names the request and OBS's error code. Details are also in the browser console (F12). |

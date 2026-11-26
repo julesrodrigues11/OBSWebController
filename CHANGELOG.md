@@ -10,6 +10,11 @@ section when a release is made (see "Releasing" in the README).
 
 ## [Unreleased]
 
+### Added
+
+- Instructions for hosting on **macOS or Linux** (README and `README-host.txt`): the web server
+  runs anywhere Node.js does; only the `.bat` helper scripts are Windows-only.
+
 ## [0.3.1] - 2026-11-26
 
 ### Added

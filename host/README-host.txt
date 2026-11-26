@@ -8,6 +8,9 @@ the local network can use it by opening a web address. Nothing is installed on t
 Full documentation: https://github.com/julesrodrigues11/stagehand-obs
 
 
+The .bat files are for Windows. On macOS or Linux, run  node server.mjs  in this folder
+instead (see "MACOS AND LINUX" below).
+
 FIRST-TIME SETUP (on the PC that will host it)
 ----------------------------------------------
 1. Install Node.js (LTS) from https://nodejs.org if it isn't installed already.
@@ -58,6 +61,18 @@ Updating from OBS Web Controller (the app's old name, v0.2 or earlier): the fold
 called "stagehand-obs". After replacing it, run install-autostart.bat again if you use it,
 and add-firewall-rule.bat as administrator. Both remove the old-named shortcut and rules.
 
+
+MACOS AND LINUX
+---------------
+The .bat files only work on Windows, but the server itself runs on any system with Node.js
+22.12 or newer:
+1. Install Node.js (LTS) and put this folder somewhere permanent.
+2. In a terminal:  cd path/to/stagehand-obs   then   node server.mjs
+   Keep the terminal open while the app is in use; Ctrl+C stops it.
+3. Allow incoming connections on port 8080 (and 4455 on the PC running OBS) in the system's
+   firewall. On macOS, click "Allow" if asked whether node may accept incoming connections.
+For starting automatically at log-in on macOS or Linux, see "Hosting on macOS or Linux" in the
+full documentation (link at the top).
 
 TROUBLESHOOTING
 ---------------
