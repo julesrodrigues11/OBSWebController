@@ -10,6 +10,8 @@ section when a release is made (see "Releasing" in the README).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-26
+
 ### Changed
 
 - The app is now called **Stagehand** (formerly OBS Web Controller), with its own icon. The
