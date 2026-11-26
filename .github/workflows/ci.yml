@@ -1,0 +1,44 @@
+# Continuous integration: GitHub runs these checks on every push and pull request.
+# A green tick on a commit means all of them passed; a red cross means one failed
+# (open the run on the Actions tab to see which step and why).
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch: # adds a "Run workflow" button on the Actions tab
+
+# If you push again while a run is still going, cancel the older run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Type-check, lint, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm # reuse downloaded packages between runs
+
+      - name: Install exactly what package-lock.json lists
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build the app
+        run: npm run build

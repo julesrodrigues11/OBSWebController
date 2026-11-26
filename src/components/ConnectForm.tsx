@@ -172,12 +172,16 @@ interface EditorProps {
 function ProfileEditor({ profile, isNew, canCancel, onSave, onCancel }: EditorProps) {
   const [p, setP] = useState(profile)
   const set = (patch: Partial<Profile>) => setP({ ...p, ...patch })
-  const valid = p.host.trim() !== '' && p.port >= 1 && p.port <= 65535
+  // Port is kept as typed text so the field can be cleared and retyped; it's checked on save.
+  const [portText, setPortText] = useState(String(profile.port))
+  const port = Number(portText)
+  const portValid = Number.isInteger(port) && port >= 1 && port <= 65535
+  const valid = p.host.trim() !== '' && portValid
 
   function submit(e: FormEvent, andConnect: boolean) {
     e.preventDefault()
     if (!valid) return
-    onSave({ ...p, host: p.host.trim(), name: p.name.trim() || p.host.trim() }, andConnect)
+    onSave({ ...p, port, host: p.host.trim(), name: p.name.trim() || p.host.trim() }, andConnect)
   }
 
   return (
@@ -194,7 +198,12 @@ function ProfileEditor({ profile, isNew, canCancel, onSave, onCancel }: EditorPr
       </label>
       <label>
         <span>Port</span>
-        <input type="number" min={1} max={65535} value={p.port} onChange={(e) => set({ port: Number(e.target.value) || 4455 })} />
+        <input
+          type="number" min={1} max={65535} value={portText} placeholder="4455"
+          className={portValid ? '' : 'is-invalid'}
+          title={portValid ? undefined : 'Port must be a number from 1 to 65535'}
+          onChange={(e) => setPortText(e.target.value)}
+        />
       </label>
       <label>
         <span>Password</span>

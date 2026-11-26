@@ -1,5 +1,7 @@
 # OBS Web Controller
 
+[![CI](https://github.com/julesrodrigues11/OBSWebController/actions/workflows/ci.yml/badge.svg)](https://github.com/julesrodrigues11/OBSWebController/actions/workflows/ci.yml)
+
 A browser-based remote control for [OBS Studio](https://obsproject.com/), built on the
 obs-websocket v5 protocol that ships with OBS 28 and later. Run it on any computer on the same
 network as your OBS machine to switch scenes, show and hide sources, reorder and transform them,
@@ -53,6 +55,7 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - [Troubleshooting](#troubleshooting)
 - [Limitations](#limitations)
 - [Development](#development)
+- [Testing](#testing)
 
 ---
 
@@ -108,7 +111,7 @@ built into OBS. Nothing needs to be installed on the OBS machine, and there is n
 | Where | What |
 |---|---|
 | OBS PC | OBS Studio **28 or later** (obs-websocket v5 is built in). OBS 30 or later is recommended: older versions don't report source setting changes live. |
-| Controller PC | [Node.js](https://nodejs.org/) **20.19+ or 22.12+** to run or build the app (`node -v` to check) |
+| Controller PC | [Node.js](https://nodejs.org/) **22.12 or later** (`node -v` to check). The current LTS (22 or 24) is recommended. |
 | Browser | A current Chromium-based browser, Firefox or Safari |
 | Network | Both machines on the same local network |
 
@@ -150,6 +153,9 @@ Open <http://localhost:5173> in your browser.
 | `npm run build` | Builds a static copy into `dist/` |
 | `npm run preview` | Serves the built `dist/` folder locally to check it |
 | `npm run lint` | Lints the source code |
+| `npm run typecheck` | Checks the TypeScript types without building |
+| `npm test` | Runs the automated tests once ([see Testing](#testing)) |
+| `npm run test:watch` | Re-runs the tests whenever you save a file |
 
 ### Hosting a built copy
 
@@ -429,8 +435,15 @@ src/
   features/
     scenes/   Scenes panel, preview, transform editor, add-source, new-scene and rename forms
     sources/  Sources panel, per-type rows, slideshow file editor, raw/other rows
+tests/
+  mock/       a fake OBS (obs-websocket server) with demo scenes and sources
+  unit/       tests for pure logic: maths, conversions, on-air rules
+  app/        tests that drive the real interface against the fake OBS
+  helpers.tsx render/connect helpers and "find this on screen" functions
 docs/
-  requirements.md   decisions and feature notes
+  requirements.md          decisions and feature notes
+  manual-test-checklist.md things to check by hand against a real OBS
+.github/workflows/ci.yml   the checks GitHub runs on every push
 ```
 
 Key ideas:
@@ -445,3 +458,68 @@ Key ideas:
   and lists (slideshow `files`) are always sent whole.
 
 See `src/README.md` for the folder layout and `docs/requirements.md` for design decisions.
+
+---
+
+## Testing
+
+### Running the tests
+
+```bash
+npm test             # run everything once (about 15 seconds)
+npm run test:watch   # keep running and re-test whenever you save a file
+npx vitest run tests/app/sources.test.tsx   # just one file
+npx vitest run -t "Escape"                  # just tests whose name contains "Escape"
+```
+
+The tests need Node.js 22.12 or later (the minimum for Vitest).
+
+Each test prints a ✓ or ✗ with its name, then a summary. A failure shows which test failed, what
+it expected, what actually happened, and the line in the test file.
+
+### What the tests cover
+
+The tests don't need OBS. They start a **fake OBS** (`tests/mock/mockObs.ts`): a small
+obs-websocket server that checks the password like OBS, holds demo scenes and sources (the same
+show as the screenshots), changes its state when the app sends requests, and sends the same
+events OBS sends. It also records every request, so tests can check exactly what the app sent,
+and it can fail requests or drop connections on purpose.
+
+| Folder / file | What's tested |
+|---|---|
+| `tests/unit/` | Pure logic: size↔scale maths, colour and path conversion, on-air rules, choosing source types, unique names, error messages |
+| `tests/app/connection.test.tsx` | Connecting, wrong password, unreachable OBS, automatic reconnection, old-OBS warning, saved connections |
+| `tests/app/scenes.test.tsx` | Scene/item order, visibility, Go live, ordering, transform editor, filter, preview |
+| `tests/app/sources.test.tsx` | Editing every source type, apply/cancel rules, slideshow list, media controls, live sync, partial load failures, scope and filters |
+| `tests/app/manage.test.tsx` | Adding, removing and deleting sources; creating, renaming and deleting scenes |
+
+App tests use [Testing Library](https://testing-library.com/) to click and type like a person
+would, in a simulated browser ([jsdom](https://github.com/jsdom/jsdom)), run by
+[Vitest](https://vitest.dev/).
+
+### Continuous integration
+
+Every push to GitHub runs `.github/workflows/ci.yml`: install, type-check, lint, test, build. The
+badge at the top of this README shows the latest result, and each commit gets a ✓ or ✗ on
+GitHub. To see why a run failed, open the **Actions** tab, click the run, and expand the red step.
+
+### What the tests can't check
+
+The fake OBS behaves like the real one as far as the app is concerned, but it isn't OBS. Things
+that depend on OBS itself (the real defaults for each source type, how sources actually render,
+media playback) are covered by a short manual checklist:
+[docs/manual-test-checklist.md](docs/manual-test-checklist.md). Run through it after upgrading
+OBS or making larger changes.
+
+### Adding a test
+
+Copy a nearby test and adapt it. A typical app test:
+
+```tsx
+test('the eye hides an item, and OBS receives the change', async () => {
+  const { obs, user } = await renderConnected()               // app + fake OBS, connected
+  await user.click(buttonTitled(itemRow('Main', 'Chat Overlay'), /click to hide/))
+  expect(await waitForRequest(obs, 'SetSceneItemEnabled'))    // what OBS received
+    .toMatchObject({ sceneName: 'Main', sceneItemEnabled: false })
+})
+```

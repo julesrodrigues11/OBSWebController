@@ -86,6 +86,16 @@ Status: decisions agreed in discussion so far. Open questions at the end.
 - Escape cancels an edit; a field with an unapplied edit is highlighted (amber).
 - Toggles and buttons (visibility, Go live) apply immediately on click.
 
+## Testing (built)
+- Vitest + Testing Library + jsdom; a fake obs-websocket server (`tests/mock`) with demo content,
+  request log, failure injection and connection drops. 98 tests (unit + app).
+- GitHub Actions CI on every push: npm ci, typecheck, lint, test, build (Node 22, Ubuntu).
+- Real-OBS behaviour is checked by hand: `docs/manual-test-checklist.md`.
+- Minimum Node.js 22.12 (Vitest). jsdom kept at 28: jsdom 30+ needs Node 22.22+/24.15+ and fails on
+  older Node 22 with "Cannot read properties of undefined (reading 'bind')".
+- Found by the tests: the connection form's Port field snapped back to 4455 when cleared (fixed:
+  the field now holds text and is validated on save).
+
 ## Later
 - Advanced Scene Switcher integration (trigger macros via websocket messages).
 - Hosting the built app on the OBS PC.
