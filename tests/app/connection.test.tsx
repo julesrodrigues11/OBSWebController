@@ -49,7 +49,8 @@ describe('connecting', () => {
   test('Disconnect returns to the connection list', async () => {
     const { user } = await renderConnected()
     await user.click(screen.getByRole('button', { name: 'Disconnect' }))
-    expect(profileRow('Test OBS')).toBeTruthy()
+    // Disconnecting waits for the connection to close (and any requests in flight), so wait for it.
+    await waitFor(() => expect(profileRow('Test OBS')).toBeTruthy())
     expect(document.querySelector('.scene')).toBeNull()
   })
 
