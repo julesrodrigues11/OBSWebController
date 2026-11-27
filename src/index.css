@@ -324,3 +324,11 @@ fieldset.srow__panel:disabled { opacity: 0.6; }
 .preview--scene .preview__rate { margin-left: auto; }
 .preview__hint { margin: 0; padding: 10px 12px; font-size: 0.85rem; }
 .preview--scene > .confirm { margin: 6px; }
+
+/* ---------- OBS stats strip (top bar) ---------- */
+.stats { display: flex; align-items: center; gap: 12px; margin: 0 auto 0 24px; font-size: 0.8rem; color: var(--muted); white-space: nowrap; overflow: hidden; cursor: default; font-variant-numeric: tabular-nums; }
+.stats__item { display: inline-flex; align-items: center; gap: 5px; }
+.stats__out { color: var(--text); font-weight: 600; }
+.stats__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--live); }
+.stats__item.stats--warn { color: #f5a524; font-weight: 600; }
+.stats__item.stats--bad { color: var(--live); font-weight: 600; }

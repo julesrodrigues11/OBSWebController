@@ -76,6 +76,14 @@ export class MockObs {
   defaults: Record<string, Json>
   program: string
   wsVersion: string
+  /** What GetStats returns; tests change it to simulate load. */
+  stats = {
+    cpuUsage: 12.4, memoryUsage: 512, availableDiskSpace: 200 * 1024, activeFps: 30, averageFrameRenderTime: 2.1,
+    renderSkippedFrames: 0, renderTotalFrames: 1000, outputSkippedFrames: 0, outputTotalFrames: 1000,
+    webSocketSessionIncomingMessages: 0, webSocketSessionOutgoingMessages: 0,
+  }
+  stream = { outputActive: false, outputReconnecting: false, outputTimecode: '00:00:00.000', outputDuration: 0, outputCongestion: 0, outputBytes: 0, outputSkippedFrames: 0, outputTotalFrames: 0 }
+  record = { outputActive: false, outputPaused: false, outputTimecode: '00:00:00.000', outputDuration: 0, outputBytes: 0 }
 
   private wss?: WebSocketServer
   private nextItemId = 1
@@ -287,6 +295,12 @@ export class MockObs {
         return { obsVersion: '31.1.2', obsWebSocketVersion: this.wsVersion, rpcVersion: 1, availableRequests: [], supportedImageFormats: ['jpg', 'png'] }
       case 'GetVideoSettings':
         return { baseWidth: 1920, baseHeight: 1080, outputWidth: 1920, outputHeight: 1080, fpsNumerator: 30, fpsDenominator: 1 }
+      case 'GetStats':
+        return { ...this.stats }
+      case 'GetStreamStatus':
+        return { ...this.stream }
+      case 'GetRecordStatus':
+        return { ...this.record }
       case 'GetSourceScreenshot':
         return { imageData: 'data:image/jpg;base64,AAAA' }
 

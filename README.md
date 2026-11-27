@@ -34,7 +34,8 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - **Audio**: there are currently no audio controls (volume, mute, monitoring, audio tracks,
   sync offset) for any source
 - Filters and effects
-- Starting/stopping streaming, recording or the virtual camera
+- Starting/stopping streaming, recording or the virtual camera (Stagehand only *shows* whether
+  they're running)
 - Transitions, Studio Mode, profiles, scene collections and OBS settings
 - Reordering or duplicating scenes
 - Editing source types other than Browser, Media, Image, Image Slideshow and Text
@@ -54,6 +55,7 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - [Running from source](#running-from-source)
 - [Connecting](#connecting)
 - [Using the app](#using-the-app)
+  - [OBS stats](#obs-stats)
   - [Program preview](#program-preview)
   - [Scene preview](#scene-preview)
   - [Scenes panel](#scenes-panel)
@@ -103,6 +105,8 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - Raw settings view (`{ }`) for every source, including types without an editor
 
 **General**
+- **OBS stats** in the top bar: FPS, CPU, stream and recording time, with warnings for skipped
+  or dropped frames and low disk space
 - Saved connections (name, address, port, optional saved password), with **export and import**
   to share them as a file
 - **Hosting package** for the OBS PC: a small web server with start / start-at-log-in scripts,
@@ -361,6 +365,37 @@ itself (after 1, 2, 5, then every 10 seconds). A wrong password is not retried.
 ## Using the app
 
 The screen has two panels: **Scenes** on the left, **Sources** on the right.
+
+### OBS stats
+
+While connected, the top bar shows how OBS is doing, updated every 2 seconds:
+
+```
+30 fps   CPU 8%   ● STREAM 1:02:33   ● REC 42:10
+```
+
+| Shown | Meaning |
+|---|---|
+| **fps** | Frames per second OBS is actually rendering |
+| **CPU** | OBS's CPU use. Left out if OBS doesn't report it (some systems don't) |
+| **● STREAM** / **● REC** | Streaming / recording, with elapsed time (*REC (paused)* when paused). Only shown while running |
+| **Disk** | Free space on the recording drive. Only shown when low: amber under 10 GB, red under 2 GB |
+| **⚠** | A problem since the last update (below) |
+
+Warnings turn **amber** when any frames were lost in the last 2 seconds, and **red** when more
+than 5% were:
+
+- **skipping frames while rendering**: the OBS PC can't keep up (the fps number changes colour);
+- **encoder skipping frames**: the encoder is overloaded;
+- **stream dropping frames**: the network can't keep up (the STREAM label changes colour).
+
+Hover over the strip for details: render time per frame, memory, total skipped and dropped
+frames, and free disk space. The numbers are the same as in OBS's own *Docks → Stats*. Stagehand
+only reads them: streaming and recording are still started and stopped in OBS.
+If something goes wrong with the strip itself, it hides and the rest of the app carries on.
+
+> With the previews open, keep an eye on the fps and skipped frames: if they get worse, slow the
+> previews down or collapse them.
 
 ### Program preview
 
@@ -636,6 +671,7 @@ Found a security problem? Please report it privately, as described in [SECURITY.
 ## Limitations
 
 - No audio controls, filters, stream/record controls or OBS settings: use OBS itself for these
+  (the top bar shows stream and recording status, read-only)
   (see [What it is (and isn't) for](#what-it-is-and-isnt-for)).
 - Only one operator at a time is assumed. Two people editing the same field: last change wins.
 - It can't browse files on the OBS PC (obs-websocket has no file access), so paths are typed or

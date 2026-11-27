@@ -1,6 +1,8 @@
 import { useConnection } from '../store/connection'
 import { useShowMode } from '../store/showMode'
 import { LockIcon, UnlockIcon } from './icons'
+import { StatsStrip } from './StatsStrip'
+import { ErrorBoundary } from './ErrorBoundary'
 import { APP_VERSION } from '../version'
 
 const LABELS = {
@@ -26,6 +28,11 @@ export function StatusBar() {
       <h1>
         Stagehand <span className="topbar__version" title="App version">v{APP_VERSION}</span>
       </h1>
+      {online && (
+        <ErrorBoundary name="Stats strip">
+          <StatsStrip />
+        </ErrorBoundary>
+      )}
       <div className="topbar__right">
         {online && (
           <span className="muted">

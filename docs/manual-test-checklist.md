@@ -86,6 +86,14 @@ Sources panel and compare with OBS's own Properties window.
 - [ ] Rename the live scene → it stays live.
 - [ ] Delete a scene → removed in OBS; the live scene's delete button is disabled.
 
+## OBS stats
+
+- [ ] The top bar's fps and CPU roughly match OBS's *Docks → Stats*.
+- [ ] Start streaming and recording in OBS: **● STREAM** and **● REC** appear with the right
+      times; pausing the recording shows *REC (paused)*; stopping removes them.
+- [ ] Overload OBS (e.g. a very high-resolution source, or an encoder preset it can't keep up
+      with): the fps turns amber/red with a ⚠ warning, matching OBS's own skipped-frame count.
+
 ## Preview
 
 - [ ] Expanded preview shows the live scene, refreshing at the chosen rate.

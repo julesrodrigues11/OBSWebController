@@ -12,6 +12,9 @@ section when a release is made (see "Releasing" in the README).
 
 ### Added
 
+- **OBS stats** in the top bar: FPS, CPU, and streaming/recording time while they run, updated
+  every 2 seconds. Warnings (amber/red) for frames skipped while rendering or encoding, frames
+  dropped by the stream, and low disk space. Hover for details. Read-only.
 - **Scene preview**: a second preview under the live one shows any scene without putting it on
   air, chosen from its dropdown or with the new monitor icon on each scene. It refreshes more
   slowly than the live preview by default, has its own **Go live** button (which asks first in
