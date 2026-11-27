@@ -10,6 +10,8 @@ section when a release is made (see "Releasing" in the README).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-27
+
 ### Added
 
 - **Show mode** (top bar): protects what's on air from accidental changes. The live scene and
