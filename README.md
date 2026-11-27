@@ -76,6 +76,8 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - **Go live** button per scene (switches the Program scene)
 - Show/hide any item with one click; hidden items are greyed out
 - Reorder items: to top, up, down, to bottom (also inside groups)
+- **Lock** items (the same lock as OBS's padlock) so their position, size and order can't be
+  changed by accident
 - Inline **transform editor**: position, rotation, size (or bounding box), crop, with aspect lock
 - **Add sources** to a scene: create a new Browser, Media, Image, Image Slideshow or Text source,
   or add an existing source or scene
@@ -401,7 +403,7 @@ Each item row shows, from left to right:
 |---|---|
 | eye | Show or hide the item in this scene (applies immediately) |
 | name, type | Source name and type label (Browser, Media, Text, Group, Scene…) |
-| lock icon | Shown if the item is locked in OBS (read-only here) |
+| padlock | Lock or unlock the item ([see below](#locking-items)). Amber and closed when locked |
 | ⤒ ▲ ▼ ⤓ | Move to top / up / down / to bottom. Faint until you hover the row |
 | arrows icon | Open the transform editor |
 | bin | Remove or delete ([see below](#removing-and-deleting)) |
@@ -425,6 +427,26 @@ Opens under the item; several can be open at once. Fields:
 - **Crop** left / top / right / bottom (pixels)
 
 Open editors update live if you move the item in OBS.
+
+#### Locking items
+
+The padlock on each item is **OBS's own lock** (the padlock in OBS's Sources dock): locking an
+item in Stagehand locks it in OBS, and the other way round. Use it for things that should never
+move, such as a logo, a camera frame or a background.
+
+<img src="docs/images/locked.png" alt="A locked item: amber padlock, order buttons disabled, transform editor read-only" width="540">
+
+While an item is locked:
+
+- its **transform editor** shows the values but can't change them;
+- its **order buttons** are disabled (its neighbours can still move around it);
+- it can still be **shown or hidden**, its source's settings can still be edited, and it can
+  still be removed or deleted.
+
+Because the lock is stored in OBS's scene collection, it applies to everyone: every Stagehand
+user, and OBS itself (where a locked item can't be dragged or resized in the preview). OBS's own
+lock doesn't block reordering; Stagehand does, so a locked item can't be sent behind something
+by accident.
 
 #### Adding sources
 

@@ -55,6 +55,9 @@ Sources panel and compare with OBS's own Properties window.
 - [ ] Transform on an item with a bounding box (*Edit Transform → Bounding Box Type*): the app
       shows *Bounds* and editing it changes the box.
 - [ ] Drag an item in OBS while its transform editor is open in the app → numbers update.
+- [ ] Padlock: lock an item in the app → OBS's Sources dock shows it locked and it can't be
+      dragged in OBS's preview. Lock one in OBS → the app's padlock closes, its transform editor
+      becomes read-only and its order buttons are disabled. Unlock from either side.
 
 ## Adding, removing, deleting
 

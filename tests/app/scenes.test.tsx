@@ -13,7 +13,7 @@ describe('scenes and items', () => {
     expect(shownItems('Main')).toEqual(['Lower Third', 'LT Name', 'LT Bar', 'Chat Overlay', 'Logo', 'Camera', 'Background Loop'])
     expect(itemRow('Main', 'Lower Third').textContent).toContain('Group')
     expect(itemRow('Interview', 'Main').textContent).toContain('Scene')
-    expect(itemRow('Main', 'Logo').querySelector('.item__lock')).not.toBeNull()
+    expect(itemRow('Main', 'Logo').querySelector('.item__lock')!.getAttribute('aria-pressed')).toBe('true')
     expect(isHidden(itemRow('BRB', 'Music'))).toBe(true)
   })
 
@@ -200,5 +200,62 @@ describe('panel controls', () => {
     const count = obs.requestsOf('GetSourceScreenshot').length
     await sleep(1300)
     expect(obs.requestsOf('GetSourceScreenshot').length).toBe(count)
+  })
+})
+
+describe('locking items', () => {
+  const lockButton = (scene: string, name: string) => itemRow(scene, name).querySelector('button.item__lock') as HTMLButtonElement
+
+  test('the padlock shows OBS\'s lock state and toggles it', async () => {
+    const { obs, user } = await renderConnected()
+    expect(lockButton('Main', 'Logo').getAttribute('aria-pressed')).toBe('true') // locked in the fixture
+    expect(lockButton('Main', 'Camera').getAttribute('aria-pressed')).toBe('false')
+
+    await user.click(lockButton('Main', 'Camera'))
+    expect(await waitForRequest(obs, 'SetSceneItemLocked')).toMatchObject({ sceneName: 'Main', sceneItemLocked: true })
+    await waitFor(() => expect(obs.containers.get('Main')!.find((i) => i.sourceName === 'Camera')!.locked).toBe(true))
+    expect(lockButton('Main', 'Camera').getAttribute('aria-pressed')).toBe('true')
+
+    await user.click(lockButton('Main', 'Logo'))
+    expect(await waitForRequest(obs, 'SetSceneItemLocked', 2)).toMatchObject({ sceneItemLocked: false })
+  })
+
+  test('works inside groups (the group is the "scene" sent to OBS)', async () => {
+    const { obs, user } = await renderConnected()
+    await user.click(lockButton('Main', 'LT Bar'))
+    expect(await waitForRequest(obs, 'SetSceneItemLocked')).toMatchObject({ sceneName: 'Lower Third', sceneItemLocked: true })
+  })
+
+  test('a locked item can\'t be reordered, but its neighbours can', async () => {
+    await renderConnected()
+    const logo = itemRow('Main', 'Logo')
+    for (const t of [/Move to top/, 'Move up', 'Move down', /Move to bottom/]) expect(buttonTitled(logo, t).disabled).toBe(true)
+    expect(buttonTitled(itemRow('Main', 'Camera'), 'Move up').disabled).toBe(false)
+  })
+
+  test('a locked item\'s transform can be viewed but not changed', async () => {
+    const { obs, user } = await renderConnected()
+    await user.click(buttonTitled(itemRow('Main', 'Logo'), 'Edit transform'))
+    await waitFor(() => expect(itemRow('Main', 'Logo').querySelector('.transform .numfield')).not.toBeNull())
+    expect(itemRow('Main', 'Logo').textContent).toMatch(/Locked: unlock the item/)
+    const inputs = [...itemRow('Main', 'Logo').querySelectorAll<HTMLInputElement>('.transform input')]
+    expect(inputs.length).toBeGreaterThan(0)
+    expect(inputs.every((i) => i.matches(':disabled'))).toBe(true)
+
+    // Unlocking (here: from OBS itself) makes it editable straight away.
+    const id = obs.containers.get('Main')!.find((i) => i.sourceName === 'Logo')!.id
+    obs.emit('SceneItemLockStateChanged', { sceneName: 'Main', sceneItemId: id, sceneItemLocked: false })
+    await waitFor(() => expect(inputs.every((i) => !i.matches(':disabled'))).toBe(true))
+    await user.click(lockButton('Main', 'Logo')) // and locking again disables it
+    await waitFor(() => expect(inputs.every((i) => i.matches(':disabled'))).toBe(true))
+    expect(obs.requestsOf('SetSceneItemTransform')).toHaveLength(0)
+  })
+
+  test('if OBS refuses, the padlock flips back and an error is shown', async () => {
+    const { obs, user } = await renderConnected()
+    obs.failNext('SetSceneItemLocked', 600, 'No scene item')
+    await user.click(lockButton('Main', 'Camera'))
+    await screen.findByText(/couldn't lock item/i)
+    expect(lockButton('Main', 'Camera').getAttribute('aria-pressed')).toBe('false')
   })
 })

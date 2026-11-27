@@ -345,6 +345,12 @@ export class MockObs {
         this.later('SceneItemEnableStateChanged', { sceneName: d.sceneName, sceneItemId: it.id, sceneItemEnabled: it.enabled })
         return
       }
+      case 'SetSceneItemLocked': {
+        const it = this.item(d.sceneName, d.sceneItemId)
+        it.locked = Boolean(d.sceneItemLocked)
+        this.later('SceneItemLockStateChanged', { sceneName: d.sceneName, sceneItemId: it.id, sceneItemLocked: it.locked })
+        return
+      }
       case 'SetSceneItemIndex': {
         const list = this.container(d.sceneName)
         const it = this.item(d.sceneName, d.sceneItemId)

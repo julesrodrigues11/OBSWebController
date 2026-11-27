@@ -12,6 +12,9 @@ section when a release is made (see "Releasing" in the README).
 
 ### Added
 
+- **Lock items** from Stagehand: the padlock on each scene item now locks or unlocks it in OBS.
+  A locked item's position, size, crop and order can't be changed (its transform editor becomes
+  read-only and its order buttons are disabled); it can still be shown, hidden and edited.
 - Instructions for hosting on **macOS or Linux** (README and `README-host.txt`): the web server
   runs anywhere Node.js does; only the `.bat` helper scripts are Windows-only.
 

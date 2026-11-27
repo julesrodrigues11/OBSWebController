@@ -27,6 +27,8 @@ interface ScenesState {
   /** Transforms of items whose editor is open, keyed by itemKey(container, id). */
   transforms: Record<string, Transform>
   setEnabled: (container: string, itemId: number, enabled: boolean) => Promise<void>
+  /** Lock or unlock an item in OBS (the padlock in OBS's Sources dock). */
+  setLocked: (container: string, itemId: number, locked: boolean) => Promise<void>
   clearError: () => void
   loadTransform: (container: string, itemId: number) => Promise<void>
   setTransform: (container: string, itemId: number, patch: Partial<Transform>) => Promise<void>
@@ -135,6 +137,11 @@ export const useScenes = create<ScenesState>()((set, get) => {
     }
   }
 
+  /** Locked items keep their position, size and order (also guarded here, not just in the UI). */
+  function isLocked(container: string, id: number) {
+    return get().items[container]?.find((it) => it.id === id)?.locked ?? false
+  }
+
   function patchItem(container: string, id: number, patch: Partial<SceneItem>) {
     const list = get().items[container]
     if (!list) return
@@ -184,6 +191,16 @@ export const useScenes = create<ScenesState>()((set, get) => {
       }
     },
 
+    setLocked: async (container, itemId, locked) => {
+      patchItem(container, itemId, { locked }) // optimistic
+      try {
+        await obs.call('SetSceneItemLocked', { sceneName: container, sceneItemId: itemId, sceneItemLocked: locked })
+      } catch (e) {
+        patchItem(container, itemId, { locked: !locked })
+        set({ error: `Couldn't ${locked ? 'lock' : 'unlock'} item: ${errorText(e)}` })
+      }
+    },
+
     clearError: () => set({ error: null }),
 
     removeItem: async (container, itemId) => {
@@ -199,7 +216,7 @@ export const useScenes = create<ScenesState>()((set, get) => {
       const list = get().items[container]
       if (!list) return
       const from = list.findIndex((it) => it.id === itemId)
-      if (from < 0) return
+      if (from < 0 || list[from].locked) return
       const last = list.length - 1
       const target = to === 'top' ? 0 : to === 'bottom' ? last : to === 'up' ? from - 1 : from + 1
       if (target < 0 || target > last || target === from) return
@@ -268,6 +285,10 @@ export const useScenes = create<ScenesState>()((set, get) => {
     },
 
     setTransform: async (container, itemId, patch) => {
+      if (isLocked(container, itemId)) {
+        set({ error: 'That item is locked: unlock it to change its position, size or crop.' })
+        return
+      }
       try {
         await obs.call('SetSceneItemTransform', {
           sceneName: container,

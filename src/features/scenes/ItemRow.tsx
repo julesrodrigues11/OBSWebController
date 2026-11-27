@@ -1,5 +1,5 @@
 import { ConfirmStrip } from '../../components/ConfirmStrip'
-import { EyeIcon, EyeOffIcon, LockIcon, TransformIcon, TrashIcon } from '../../components/icons'
+import { EyeIcon, EyeOffIcon, LockIcon, TransformIcon, TrashIcon, UnlockIcon } from '../../components/icons'
 import { kindLabel } from '../../obs/kinds'
 import { useInputs } from '../../store/inputs'
 import { containersOf } from '../../store/live'
@@ -15,6 +15,7 @@ const indent = (depth: number, base = 8) => ({ paddingLeft: base + depth * 18 })
 export function ItemRow({ row, ui }: { row: Row; ui: ScenesPanelState }) {
   const { item, container, depth } = row
   const setEnabled = useScenes((s) => s.setEnabled)
+  const setLocked = useScenes((s) => s.setLocked)
   const key = itemKey(container, item.id)
   const editing = ui.openEditors.has(key)
 
@@ -31,12 +32,15 @@ export function ItemRow({ row, ui }: { row: Row; ui: ScenesPanelState }) {
         </button>
         <span className="item__name">{item.sourceName}</span>
         <span className="item__kind">{kindLabel(item.inputKind, item)}</span>
-        {item.locked && (
-          <span className="item__lock" title="Locked in OBS">
-            <LockIcon />
-          </span>
-        )}
-        <OrderButtons container={container} itemId={item.id} />
+        <button
+          className={`icon-button item__lock ${item.locked ? 'is-locked' : 'is-off'}`}
+          onClick={() => void setLocked(container, item.id, !item.locked)}
+          aria-pressed={item.locked}
+          title={item.locked ? 'Locked: position, size and order are protected. Click to unlock' : 'Unlocked: click to lock its position, size and order'}
+        >
+          {item.locked ? <LockIcon /> : <UnlockIcon />}
+        </button>
+        <OrderButtons container={container} itemId={item.id} locked={item.locked} />
         <button
           className={`icon-button ${editing ? 'is-active' : 'is-off'}`}
           onClick={() => ui.toggleEditor(key)}

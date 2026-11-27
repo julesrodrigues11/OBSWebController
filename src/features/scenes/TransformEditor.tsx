@@ -15,6 +15,8 @@ const positive = (n: number) => n > 0
 
 export function TransformEditor({ container, itemId }: Props) {
   const t = useScenes((s) => s.transforms[itemKey(container, itemId)])
+  // A locked item's transform can be viewed but not changed (as in OBS, where locked items can't be dragged).
+  const locked = useScenes((s) => s.items[container]?.find((i) => i.id === itemId)?.locked ?? false)
   const loadTransform = useScenes((s) => s.loadTransform)
   const setTransform = useScenes((s) => s.setTransform)
   const [lockAspect, setLockAspect] = useState(() => {
@@ -50,7 +52,8 @@ export function TransformEditor({ container, itemId }: Props) {
   }
 
   return (
-    <div className="transform">
+    <fieldset className="transform" disabled={locked}>
+      {locked && <p className="transform__locked">Locked: unlock the item to change its position, size or crop.</p>}
       <div className="transform__group">
         <span className="transform__title">Position</span>
         <NumberField label="X" value={t.positionX} onCommit={(n) => apply({ positionX: n })} unit="px" />
@@ -93,6 +96,6 @@ export function TransformEditor({ container, itemId }: Props) {
         <NumberField label="R" value={t.cropRight} validate={nonNegInt} onCommit={(n) => apply({ cropRight: Math.round(n) })} />
         <NumberField label="B" value={t.cropBottom} validate={nonNegInt} onCommit={(n) => apply({ cropBottom: Math.round(n) })} />
       </div>
-    </div>
+    </fieldset>
   )
 }

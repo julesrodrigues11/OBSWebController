@@ -101,7 +101,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 .item:hover { background: #ffffff08; }
 .item__name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item__kind { color: var(--muted); font-size: 0.78rem; }
-.item__lock { color: var(--muted); display: inline-flex; }
+
 .item.is-hidden .item__name { color: var(--muted); }
 
 .icon-button {
@@ -299,3 +299,7 @@ input.is-invalid { border-color: var(--live); }
 .connect__import-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.85rem; color: var(--muted); }
 .connect__import .error, .connect__import .transfer__done { margin: 0; font-size: 0.85rem; }
 .connect__notice { margin: 0; }
+.icon-button.is-locked { color: #f5a524; }
+fieldset.transform { border: 0; margin: 0; min-width: 0; }
+fieldset.transform:disabled { opacity: 0.6; }
+.transform__locked { flex-basis: 100%; margin: 0; color: #f5a524; font-size: 0.8rem; }
