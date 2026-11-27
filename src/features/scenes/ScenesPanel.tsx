@@ -4,6 +4,7 @@ import { useScenes } from '../../store/scenes'
 import { NewScene } from './NewScene'
 import type { ScenesPanelState } from './panelState'
 import { ProgramPreview } from './ProgramPreview'
+import { ScenePreview } from './ScenePreview'
 import { filterScenes } from './rows'
 import { SceneSection } from './SceneSection'
 import { useCollapsed } from './useCollapsed'
@@ -77,6 +78,7 @@ export function ScenesPanel() {
       {creatingScene && <NewScene onClose={() => setCreatingScene(false)} />}
 
       <ProgramPreview />
+      <ScenePreview />
 
       {actionError && (
         <p className="error" role="alert">

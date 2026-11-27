@@ -3,6 +3,7 @@ import { obs, errorText } from '../obs/client'
 import { useConnection } from './connection'
 import type { Transform } from '../obs/transform'
 import { useUi } from './ui'
+import { useScenePreview } from './scenePreview'
 import { SHOW_MODE_BLOCKED, protectedContainers, useShowMode } from './showMode'
 
 /** A scene item. Visibility and lock belong to the item (per scene), not to the source. */
@@ -276,6 +277,7 @@ export const useScenes = create<ScenesState>()((set, get) => {
         // Keep the Sources panel on this scene if it was showing it.
         const { scope, setScope } = useUi.getState()
         if (scope.mode === 'scene' && scope.scene === oldName) setScope({ mode: 'scene', scene: newName })
+        useScenePreview.getState().renamed(oldName, newName) // and the scene preview
         return null // lists refresh via SceneNameChanged
       } catch (e) {
         return errorText(e)

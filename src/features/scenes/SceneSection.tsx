@@ -1,8 +1,9 @@
 import { ConfirmStrip } from '../../components/ConfirmStrip'
-import { useConnection, type SceneInfo } from '../../store/connection'
+import type { SceneInfo } from '../../store/connection'
 import { containersOf, useProtection } from '../../store/live'
 import { itemKey, useScenes } from '../../store/scenes'
 import { AddSource } from './AddSource'
+import { GoLiveConfirm } from './GoLiveConfirm'
 import { ItemRow } from './ItemRow'
 import type { ScenesPanelState } from './panelState'
 import type { Row } from './rows'
@@ -38,19 +39,6 @@ export function SceneSection({ scene, rows, open, live, onToggle, ui }: Props) {
         </ul>
       )}
     </div>
-  )
-}
-
-/** Show mode: switching the live scene asks first. */
-function GoLiveConfirm({ name, onDone }: { name: string; onDone: () => void }) {
-  const goLive = useConnection((s) => s.goLive)
-  const current = useConnection((s) => s.programScene)
-  return (
-    <ConfirmStrip
-      message={<>Show mode: switch the live scene{current && <> from <strong>{current}</strong></>} to <strong>{name}</strong>?</>}
-      actions={[{ label: 'Go live', onClick: () => void goLive(name) }]}
-      onCancel={onDone}
-    />
   )
 }
 

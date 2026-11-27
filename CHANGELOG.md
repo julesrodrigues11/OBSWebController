@@ -10,6 +10,13 @@ section when a release is made (see "Releasing" in the README).
 
 ## [Unreleased]
 
+### Added
+
+- **Scene preview**: a second preview under the live one shows any scene without putting it on
+  air, chosen from its dropdown or with the new monitor icon on each scene. It refreshes more
+  slowly than the live preview by default, has its own **Go live** button (which asks first in
+  show mode), and keeps following a scene that's renamed.
+
 ## [0.4.0] - 2026-11-27
 
 ### Added

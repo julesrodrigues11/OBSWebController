@@ -313,3 +313,14 @@ fieldset.srow__panel:disabled { opacity: 0.6; }
 .srow .field:disabled, .srow button:disabled, .srow input:disabled, .srow textarea:disabled, .srow select:disabled { opacity: 0.55; cursor: not-allowed; }
 .icon-button:disabled { opacity: 0.35; cursor: not-allowed; }
 .icon-button:disabled:hover { border-color: transparent; }
+
+/* ---------- scene preview (second panel) ---------- */
+.preview--program { border-color: #e5484d66; }
+.preview--scene .preview__head { gap: 6px; }
+.preview__toggle { flex: 0 0 auto; }
+.preview__scene { font: inherit; font-size: 0.85rem; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px 4px; min-width: 0; flex: 1 1 auto; max-width: 220px; }
+.preview--scene .button--golive, .preview--scene .badge { margin-left: auto; }
+.preview--scene .preview__rate + .button--golive, .preview--scene .preview__rate + .badge { margin-left: 6px; }
+.preview--scene .preview__rate { margin-left: auto; }
+.preview__hint { margin: 0; padding: 10px 12px; font-size: 0.85rem; }
+.preview--scene > .confirm { margin: 6px; }

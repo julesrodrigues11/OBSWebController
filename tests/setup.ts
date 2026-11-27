@@ -6,6 +6,7 @@ import { cleanup } from '@testing-library/react'
 import { useConnection } from '../src/store/connection'
 import { useHost } from '../src/store/host'
 import { useShowMode } from '../src/store/showMode'
+import { useScenePreview } from '../src/store/scenePreview'
 import { stopAllMocks } from './helpers'
 
 // The app asks for ./host.json at start-up (to see if it's hosted on the OBS PC). By default tests
@@ -32,6 +33,7 @@ afterEach(async () => {
   globalThis.fetch = realFetch
   useHost.setState({ info: null, loaded: false })
   useShowMode.setState({ on: false })
+  useScenePreview.setState({ scene: null, open: false, rate: 2 })
 })
 
 // React warns when state changes outside its test helper `act()`. Here those changes come from

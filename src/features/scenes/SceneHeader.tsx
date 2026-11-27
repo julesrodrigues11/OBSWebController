@@ -1,6 +1,7 @@
-import { ChevronIcon, ListIcon, PencilIcon, PlusIcon, TrashIcon } from '../../components/icons'
+import { ChevronIcon, ListIcon, MonitorIcon, PencilIcon, PlusIcon, TrashIcon } from '../../components/icons'
 import { useConnection, type SceneInfo } from '../../store/connection'
 import { useProtection } from '../../store/live'
+import { useScenePreview } from '../../store/scenePreview'
 import { useScenes } from '../../store/scenes'
 import { useUi } from '../../store/ui'
 import type { ScenesPanelState } from './panelState'
@@ -22,6 +23,8 @@ export function SceneHeader({ scene, open, live, onToggle, ui }: Props) {
   const itemCount = useScenes((s) => s.items[name]?.length ?? 0)
   const scope = useUi((s) => s.scope)
   const setScope = useUi((s) => s.setScope)
+  const previewing = useScenePreview((s) => s.open && s.scene === name)
+  const showPreview = useScenePreview((s) => s.show)
   const { on: showMode, sceneLocked } = useProtection()
   const locked = sceneLocked(name) // show mode: this is the live scene, or nested in it
   const renaming = ui.renaming === name && !locked
@@ -63,6 +66,13 @@ export function SceneHeader({ scene, open, live, onToggle, ui }: Props) {
         title={locked ? lockedTitle : 'Add a source to this scene'}
       >
         <PlusIcon />
+      </button>
+      <button
+        className={`icon-button ${previewing ? 'is-active' : 'is-off'}`}
+        onClick={() => showPreview(name)}
+        title="Preview this scene (without putting it on air)"
+      >
+        <MonitorIcon />
       </button>
       <button
         className={`icon-button ${scope.mode === 'scene' && scope.scene === name ? 'is-active' : 'is-off'}`}

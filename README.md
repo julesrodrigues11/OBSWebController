@@ -55,6 +55,7 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - [Connecting](#connecting)
 - [Using the app](#using-the-app)
   - [Program preview](#program-preview)
+  - [Scene preview](#scene-preview)
   - [Scenes panel](#scenes-panel)
   - [Sources panel](#sources-panel)
   - [Editing fields](#editing-fields)
@@ -84,7 +85,8 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
   or add an existing source or scene
 - **Create** new scenes and **rename** scenes
 - **Delete** items, sources and scenes, with a confirmation step
-- Collapsible, low-rate **preview** of the live scene
+- Collapsible, low-rate **preview** of the live scene, plus a second preview for any other scene
+  (to check the next scene before it goes live)
 - **Show mode**: protects the live scene and everything on air from accidental changes, while
   other scenes stay editable
 
@@ -369,6 +371,25 @@ At the top of the Scenes panel, **Program: \<scene\>** shows a snapshot of what 
 - It is a series of still images, not video. Snapshots are only taken while the preview is
   expanded and the browser tab is visible, so collapsing it puts no load on OBS.
 
+### Scene preview
+
+Under the live preview, **Preview: \<scene\>** shows any other scene **without putting it on
+air**, so you can check the scene you're preparing while still watching what's live.
+
+- Pick the scene from its dropdown, or click the **monitor icon** in a scene's header.
+- It refreshes every 1, 2 or 5 seconds (2 by default, slower than the live preview, to spare OBS).
+  Like the live preview, it only takes snapshots while expanded and the tab is visible.
+- **Go live** on the panel puts the previewed scene on air (asking first in
+  [show mode](#show-mode)). If the previewed scene is the live one, it shows **LIVE** instead.
+- It keeps following a scene you rename in Stagehand.
+
+> Sources that only run while on air may look blank or out of date here: browser sources with
+> *Shutdown source when not visible* ticked, and media set to restart when it becomes active.
+> Images, text, colours and positions always show correctly.
+
+With both previews open, OBS makes two sets of snapshots. If OBS's stats show lag during a show,
+slow one of them down or collapse the scene preview.
+
 ### Scenes panel
 
 Each scene is a collapsible box. The header shows:
@@ -378,6 +399,7 @@ Each scene is a collapsible box. The header shows:
 | ▸ name, count | Collapse or expand the scene (remembered). Double-click the name to rename it |
 | pencil | Rename the scene |
 | **+** | Add a source to this scene ([see below](#adding-sources)) |
+| monitor icon | Show this scene in the [scene preview](#scene-preview), without putting it on air |
 | list icon | Show only this scene's sources in the Sources panel |
 | bin | Delete the scene (with confirmation) |
 | **Go live** / **LIVE** | Switch the live scene to this one / marks the scene that is live |
@@ -549,7 +571,7 @@ protects what's on air from accidental clicks, but lets you keep preparing the n
 | **The live scene**, and groups and scenes nested in it | Show/hide, order, transform (read-only), add, remove, rename, delete | Locking items, viewing transforms, collapsing |
 | **Sources visible on air** (marked **LIVE**), wherever you edit them | Settings, Refresh, media and slideshow controls, delete | `{ }` (viewing settings) |
 | **Other scenes and sources** | Nothing | Everything |
-| **Go live** | | Asks *"Switch the live scene from A to B?"* first |
+| **Go live** (on a scene or the scene preview) | | Asks *"Switch the live scene from A to B?"* first |
 
 - Protection **follows the live scene**: after Go live, the new live scene is protected and the
   old one becomes editable. This also happens when the scene is switched in OBS or from another
@@ -570,7 +592,7 @@ anywhere except to OBS.
 | Item | Notes |
 |---|---|
 | Saved connections | Name, address, port; password only if you ticked *Save password* |
-| Interface choices | Collapsed scenes, preview open/rate, aspect lock, source scope and type filter, show mode |
+| Interface choices | Collapsed scenes, previews (open, rate, chosen scene), aspect lock, source scope and type filter, show mode |
 
 Saved connections are per browser; use **Export** / **Import** to move them to another
 computer. Clearing the browser's site data removes everything.

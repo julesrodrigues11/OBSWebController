@@ -91,6 +91,11 @@ Sources panel and compare with OBS's own Properties window.
 - [ ] Expanded preview shows the live scene, refreshing at the chosen rate.
 - [ ] At *every 0.5s*, OBS's own stats (*Docks → Stats*) show no dropped/lagged frames.
 - [ ] Collapsing it (or switching to another browser tab) stops the snapshots.
+- [ ] Scene preview: the monitor icon on a non-live scene shows it under the live preview; what it
+      shows matches that scene in OBS (note any browser or media sources that look blank).
+- [ ] With **both** previews open during a recording or stream, OBS's stats show no dropped or
+      lagged frames.
+- [ ] *Go live* on the scene preview switches OBS (and asks first in show mode).
 
 ## Hosting package (on the OBS PC)
 

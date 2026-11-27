@@ -19,6 +19,9 @@ export const STORAGE_KEYS = {
   sourceScope: 'obs-web-controller:source-scope',
   sourceTypes: 'obs-web-controller:source-types',
   showMode: 'obs-web-controller:show-mode',
+  scenePreview: 'obs-web-controller:scene-preview',
+  scenePreviewOpen: 'obs-web-controller:scene-preview-open',
+  scenePreviewRate: 'obs-web-controller:scene-preview-rate',
 } as const
 
 export function readString(key: string): string | null {
