@@ -10,6 +10,8 @@ section when a release is made (see "Releasing" in the README).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-27
+
 ### Added
 
 - **OBS stats** in the top bar: FPS, CPU, and streaming/recording time while they run, updated
