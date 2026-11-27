@@ -1,4 +1,6 @@
 import { useConnection } from '../store/connection'
+import { useShowMode } from '../store/showMode'
+import { LockIcon, UnlockIcon } from './icons'
 import { APP_VERSION } from '../version'
 
 const LABELS = {
@@ -14,6 +16,8 @@ export function StatusBar() {
   const settings = useConnection((s) => s.settings)
   const server = useConnection((s) => s.server)
   const disconnect = useConnection((s) => s.disconnect)
+  const showMode = useShowMode((s) => s.on)
+  const setShowMode = useShowMode((s) => s.setOn)
 
   const online = status === 'connected' || status === 'reconnecting'
 
@@ -31,6 +35,18 @@ export function StatusBar() {
           </span>
         )}
         <span className={`status status--${status}`}>{LABELS[status]}</span>
+        {online && (
+          <button
+            className={`button--small showmode ${showMode ? 'is-on' : ''}`}
+            onClick={() => setShowMode(!showMode)}
+            aria-pressed={showMode}
+            title={showMode
+              ? 'Show mode is on: the live scene and what’s on air are protected. Click to turn off'
+              : 'Turn on show mode: protect the live scene and what’s on air from accidental changes'}
+          >
+            {showMode ? <LockIcon /> : <UnlockIcon />} Show mode
+          </button>
+        )}
         {online && (
           <button className="button--small" onClick={() => void disconnect()}>
             Disconnect

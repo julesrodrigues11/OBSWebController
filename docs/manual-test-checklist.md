@@ -59,6 +59,15 @@ Sources panel and compare with OBS's own Properties window.
       dragged in OBS's preview. Lock one in OBS → the app's padlock closes, its transform editor
       becomes read-only and its order buttons are disabled. Unlock from either side.
 
+## Show mode
+
+- [ ] Turn on show mode: the live scene's controls and its LIVE sources' fields are greyed out;
+      other scenes and sources still work and change OBS.
+- [ ] Go live with another scene: a confirmation appears; after confirming, the new live scene is
+      protected and the old one is editable.
+- [ ] Switch scenes in OBS itself: the protection moves in the app.
+- [ ] Reload the page: show mode is still on.
+
 ## Adding, removing, deleting
 
 - [ ] Add a new source of each of the five types: it appears in OBS at the top of the scene,

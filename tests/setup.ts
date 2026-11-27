@@ -5,6 +5,7 @@ import { afterEach, beforeEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import { useConnection } from '../src/store/connection'
 import { useHost } from '../src/store/host'
+import { useShowMode } from '../src/store/showMode'
 import { stopAllMocks } from './helpers'
 
 // The app asks for ./host.json at start-up (to see if it's hosted on the OBS PC). By default tests
@@ -30,6 +31,7 @@ afterEach(async () => {
   if (typeof localStorage !== 'undefined') localStorage.clear()
   globalThis.fetch = realFetch
   useHost.setState({ info: null, loaded: false })
+  useShowMode.setState({ on: false })
 })
 
 // React warns when state changes outside its test helper `act()`. Here those changes come from

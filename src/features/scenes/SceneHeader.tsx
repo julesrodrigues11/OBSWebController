@@ -1,5 +1,6 @@
 import { ChevronIcon, ListIcon, PencilIcon, PlusIcon, TrashIcon } from '../../components/icons'
 import { useConnection, type SceneInfo } from '../../store/connection'
+import { useProtection } from '../../store/live'
 import { useScenes } from '../../store/scenes'
 import { useUi } from '../../store/ui'
 import type { ScenesPanelState } from './panelState'
@@ -21,8 +22,11 @@ export function SceneHeader({ scene, open, live, onToggle, ui }: Props) {
   const itemCount = useScenes((s) => s.items[name]?.length ?? 0)
   const scope = useUi((s) => s.scope)
   const setScope = useUi((s) => s.setScope)
-  const renaming = ui.renaming === name
-  const canDelete = !live && sceneCount > 1
+  const { on: showMode, sceneLocked } = useProtection()
+  const locked = sceneLocked(name) // show mode: this is the live scene, or nested in it
+  const renaming = ui.renaming === name && !locked
+  const canDelete = !live && !locked && sceneCount > 1
+  const lockedTitle = 'Show mode: this scene is on air and protected'
 
   return (
     <div className="scene__head">
@@ -35,7 +39,7 @@ export function SceneHeader({ scene, open, live, onToggle, ui }: Props) {
         <button
           className="scene__toggle"
           onClick={onToggle}
-          onDoubleClick={(e) => { e.preventDefault(); ui.setRenaming(name) }}
+          onDoubleClick={(e) => { e.preventDefault(); if (!locked) ui.setRenaming(name) }}
           aria-expanded={open}
           title="Click to collapse/expand · double-click to rename"
         >
@@ -47,14 +51,16 @@ export function SceneHeader({ scene, open, live, onToggle, ui }: Props) {
       <button
         className={`icon-button ${renaming ? 'is-active' : 'is-off'}`}
         onClick={() => ui.setRenaming(renaming ? null : name)}
-        title="Rename this scene"
+        disabled={locked}
+        title={locked ? lockedTitle : 'Rename this scene'}
       >
         <PencilIcon />
       </button>
       <button
         className={`icon-button ${ui.adding === name ? 'is-active' : 'is-off'}`}
         onClick={() => ui.setAdding(ui.adding === name ? null : name)}
-        title="Add a source to this scene"
+        disabled={locked}
+        title={locked ? lockedTitle : 'Add a source to this scene'}
       >
         <PlusIcon />
       </button>
@@ -69,14 +75,19 @@ export function SceneHeader({ scene, open, live, onToggle, ui }: Props) {
         className="icon-button icon-button--danger is-off"
         onClick={() => ui.setConfirming(`scene:${name}`)}
         disabled={!canDelete}
-        title={live ? 'This scene is live: switch to another scene before deleting it' : sceneCount <= 1 ? 'OBS needs at least one scene' : 'Delete this scene'}
+        title={live ? 'This scene is live: switch to another scene before deleting it' : locked ? lockedTitle : sceneCount <= 1 ? 'OBS needs at least one scene' : 'Delete this scene'}
       >
         <TrashIcon />
       </button>
       {live ? (
         <span className="badge badge--live">LIVE</span>
       ) : (
-        <button className="button--golive" onClick={() => void goLive(name)} title="Switch the live (Program) scene to this one">
+        <button
+          className="button--golive"
+          // In show mode, switching scenes asks first (see SceneSection).
+          onClick={() => (showMode ? ui.setConfirming(`golive:${name}`) : void goLive(name))}
+          title="Switch the live (Program) scene to this one"
+        >
           Go live
         </button>
       )}

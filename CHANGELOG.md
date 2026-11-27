@@ -12,6 +12,11 @@ section when a release is made (see "Releasing" in the README).
 
 ### Added
 
+- **Show mode** (top bar): protects what's on air from accidental changes. The live scene and
+  everything nested in it can't be shown/hidden, reordered, transformed, added to, renamed or
+  deleted, and sources visible on air can't be edited. Other scenes stay editable, and Go live
+  asks for confirmation. Protection follows the live scene, and the setting is remembered by
+  each browser.
 - **Lock items** from Stagehand: the padlock on each scene item now locks or unlocks it in OBS.
   A locked item's position, size, crop and order can't be changed (its transform editor becomes
   read-only and its order buttons are disabled); it can still be shown, hidden and edited.

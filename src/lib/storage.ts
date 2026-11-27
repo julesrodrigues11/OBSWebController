@@ -18,6 +18,7 @@ export const STORAGE_KEYS = {
   lockAspect: 'obs-web-controller:lock-aspect',
   sourceScope: 'obs-web-controller:source-scope',
   sourceTypes: 'obs-web-controller:source-types',
+  showMode: 'obs-web-controller:show-mode',
 } as const
 
 export function readString(key: string): string | null {

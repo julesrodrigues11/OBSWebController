@@ -303,3 +303,13 @@ input.is-invalid { border-color: var(--live); }
 fieldset.transform { border: 0; margin: 0; min-width: 0; }
 fieldset.transform:disabled { opacity: 0.6; }
 .transform__locked { flex-basis: 100%; margin: 0; color: #f5a524; font-size: 0.8rem; }
+
+/* ---------- show mode ---------- */
+.showmode { display: inline-flex; align-items: center; gap: 5px; }
+.showmode.is-on { color: #1a1200; background: #f5a524; border-color: #f5a524; font-weight: 600; }
+fieldset.srow__cells { display: contents; }
+fieldset.srow__panel { border: 0; margin: 0; min-width: 0; }
+fieldset.srow__panel:disabled { opacity: 0.6; }
+.srow .field:disabled, .srow button:disabled, .srow input:disabled, .srow textarea:disabled, .srow select:disabled { opacity: 0.55; cursor: not-allowed; }
+.icon-button:disabled { opacity: 0.35; cursor: not-allowed; }
+.icon-button:disabled:hover { border-color: transparent; }

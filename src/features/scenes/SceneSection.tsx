@@ -1,6 +1,6 @@
 import { ConfirmStrip } from '../../components/ConfirmStrip'
-import type { SceneInfo } from '../../store/connection'
-import { containersOf } from '../../store/live'
+import { useConnection, type SceneInfo } from '../../store/connection'
+import { containersOf, useProtection } from '../../store/live'
 import { itemKey, useScenes } from '../../store/scenes'
 import { AddSource } from './AddSource'
 import { ItemRow } from './ItemRow'
@@ -20,10 +20,13 @@ interface Props {
 /** One scene's box: header, add-source form, delete confirmation, and its items. */
 export function SceneSection({ scene, rows, open, live, onToggle, ui }: Props) {
   const name = scene.sceneName
+  const { sceneLocked } = useProtection()
+  const locked = sceneLocked(name)
   return (
     <div className={`scene ${live ? 'is-live' : ''}`}>
       <SceneHeader scene={scene} open={open} live={live} onToggle={onToggle} ui={ui} />
-      {ui.adding === name && <AddSource sceneName={name} onClose={() => ui.setAdding(null)} />}
+      {ui.confirming === `golive:${name}` && <GoLiveConfirm name={name} onDone={() => ui.setConfirming(null)} />}
+      {ui.adding === name && !locked && <AddSource sceneName={name} onClose={() => ui.setAdding(null)} />}
       {ui.confirming === `scene:${name}` && <SceneDeleteConfirm name={name} onDone={() => ui.setConfirming(null)} />}
 
       {open && (
@@ -35,6 +38,19 @@ export function SceneSection({ scene, rows, open, live, onToggle, ui }: Props) {
         </ul>
       )}
     </div>
+  )
+}
+
+/** Show mode: switching the live scene asks first. */
+function GoLiveConfirm({ name, onDone }: { name: string; onDone: () => void }) {
+  const goLive = useConnection((s) => s.goLive)
+  const current = useConnection((s) => s.programScene)
+  return (
+    <ConfirmStrip
+      message={<>Show mode: switch the live scene{current && <> from <strong>{current}</strong></>} to <strong>{name}</strong>?</>}
+      actions={[{ label: 'Go live', onClick: () => void goLive(name) }]}
+      onCancel={onDone}
+    />
   )
 }
 

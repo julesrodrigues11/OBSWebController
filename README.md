@@ -58,6 +58,7 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
   - [Scenes panel](#scenes-panel)
   - [Sources panel](#sources-panel)
   - [Editing fields](#editing-fields)
+  - [Show mode](#show-mode)
 - [What the app stores](#what-the-app-stores)
 - [Security](#security)
 - [Troubleshooting](#troubleshooting)
@@ -84,6 +85,8 @@ It is **not a replacement for OBS**. More specialist work is still done in OBS i
 - **Create** new scenes and **rename** scenes
 - **Delete** items, sources and scenes, with a confirmation step
 - Collapsible, low-rate **preview** of the live scene
+- **Show mode**: protects the live scene and everything on air from accidental changes, while
+  other scenes stay editable
 
 **Sources**
 - One editable table per source type, all visible at once:
@@ -536,6 +539,27 @@ removed automatically, so you can paste straight from Windows Explorer's *Copy a
 
 Changes to a source marked **LIVE** appear on stream immediately.
 
+### Show mode
+
+Turn on **Show mode** (top bar, next to *Connected*) before a show. While it's on, Stagehand
+protects what's on air from accidental clicks, but lets you keep preparing the next scene.
+
+| | Protected (greyed out) | Still allowed |
+|---|---|---|
+| **The live scene**, and groups and scenes nested in it | Show/hide, order, transform (read-only), add, remove, rename, delete | Locking items, viewing transforms, collapsing |
+| **Sources visible on air** (marked **LIVE**), wherever you edit them | Settings, Refresh, media and slideshow controls, delete | `{ }` (viewing settings) |
+| **Other scenes and sources** | Nothing | Everything |
+| **Go live** | | Asks *"Switch the live scene from A to B?"* first |
+
+- Protection **follows the live scene**: after Go live, the new live scene is protected and the
+  old one becomes editable. This also happens when the scene is switched in OBS or from another
+  device.
+- A source used in several scenes is protected everywhere while it's on air, because changing it
+  in any scene changes it on stream.
+- Show mode is a setting of **this browser**: it's remembered after a reload, but it isn't
+  shared. Someone else's Stagehand, OBS itself and other tools aren't affected.
+- To change something that's on air, turn show mode off, make the change, and turn it back on.
+
 ---
 
 ## What the app stores
@@ -546,7 +570,7 @@ anywhere except to OBS.
 | Item | Notes |
 |---|---|
 | Saved connections | Name, address, port; password only if you ticked *Save password* |
-| Interface choices | Collapsed scenes, preview open/rate, aspect lock, source scope and type filter |
+| Interface choices | Collapsed scenes, preview open/rate, aspect lock, source scope and type filter, show mode |
 
 Saved connections are per browser; use **Export** / **Import** to move them to another
 computer. Clearing the browser's site data removes everything.

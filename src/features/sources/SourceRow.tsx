@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useInputs, type Settings } from '../../store/inputs'
 import { useScenes } from '../../store/scenes'
-import { containersOf } from '../../store/live'
+import { containersOf, useProtection } from '../../store/live'
 import { ConfirmStrip } from '../../components/ConfirmStrip'
 import { TrashIcon } from '../../components/icons'
 
@@ -22,6 +22,7 @@ export function SourceRow({ name, live, dim, settings, children, extra }: Props)
   const [open, setOpen] = useState<'extra' | 'raw' | null>(null)
   const [confirming, setConfirming] = useState(false)
   const toggle = (which: 'extra' | 'raw') => setOpen(open === which ? null : which)
+  const locked = useProtection().sourceLocked(name) // show mode: visible on air
 
   return (
     <div className={`srow ${live ? 'is-live' : ''} ${open ? 'is-open' : ''} ${dim ? 'is-dim' : ''}`}>
@@ -29,7 +30,10 @@ export function SourceRow({ name, live, dim, settings, children, extra }: Props)
         <span className="srow__label">{name}</span>
         {live && <span className="badge badge--live" title="Visible on air right now">LIVE</span>}
       </div>
-      {typeof children === 'function' ? children({ openExtra: () => setOpen('extra') }) : children}
+      {/* display: contents keeps the cells in the table's grid; disabled covers every control in them. */}
+      <fieldset className="srow__cells" disabled={locked} title={locked ? 'Show mode: this source is on air and protected' : undefined}>
+        {typeof children === 'function' ? children({ openExtra: () => setOpen('extra') }) : children}
+      </fieldset>
       <div className="srow__actions">
         {extra && (
           <button className={`chip ${open === 'extra' ? 'is-active' : ''}`} onClick={() => toggle('extra')} title={extra.title}>
@@ -39,12 +43,19 @@ export function SourceRow({ name, live, dim, settings, children, extra }: Props)
         <button className={`chip ${open === 'raw' ? 'is-active' : ''}`} onClick={() => toggle('raw')} title="Show every setting OBS stores for this source">
           {'{ }'}
         </button>
-        <button className="icon-button icon-button--danger is-off" onClick={() => setConfirming(true)} title="Delete this source…">
+        <button
+          className="icon-button icon-button--danger is-off"
+          onClick={() => setConfirming(true)}
+          disabled={locked}
+          title={locked ? 'Show mode: this source is on air and protected' : 'Delete this source…'}
+        >
           <TrashIcon />
         </button>
       </div>
-      {confirming && <DeleteSourceConfirm name={name} onDone={() => setConfirming(false)} />}
-      {open === 'extra' && extra && <div className="srow__panel">{extra.render()}</div>}
+      {confirming && !locked && <DeleteSourceConfirm name={name} onDone={() => setConfirming(false)} />}
+      {open === 'extra' && extra && (
+        <fieldset className="srow__panel" disabled={locked}>{extra.render()}</fieldset>
+      )}
       {open === 'raw' && (
         <div className="srow__panel">
           <pre className="raw">{JSON.stringify(settings, null, 2)}</pre>

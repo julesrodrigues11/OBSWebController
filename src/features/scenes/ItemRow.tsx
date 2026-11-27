@@ -2,7 +2,7 @@ import { ConfirmStrip } from '../../components/ConfirmStrip'
 import { EyeIcon, EyeOffIcon, LockIcon, TransformIcon, TrashIcon, UnlockIcon } from '../../components/icons'
 import { kindLabel } from '../../obs/kinds'
 import { useInputs } from '../../store/inputs'
-import { containersOf } from '../../store/live'
+import { containersOf, useProtection } from '../../store/live'
 import { itemKey, useScenes } from '../../store/scenes'
 import { OrderButtons } from './OrderButtons'
 import type { ScenesPanelState } from './panelState'
@@ -18,6 +18,8 @@ export function ItemRow({ row, ui }: { row: Row; ui: ScenesPanelState }) {
   const setLocked = useScenes((s) => s.setLocked)
   const key = itemKey(container, item.id)
   const editing = ui.openEditors.has(key)
+  const onAir = useProtection().sceneLocked(container) // show mode: in the live scene
+  const onAirTitle = 'Show mode: this scene is on air and protected'
 
   return (
     <li className={`item-wrap ${editing ? 'is-editing' : ''}`}>
@@ -26,7 +28,8 @@ export function ItemRow({ row, ui }: { row: Row; ui: ScenesPanelState }) {
           className={`icon-button ${item.enabled ? '' : 'is-off'}`}
           onClick={() => void setEnabled(container, item.id, !item.enabled)}
           aria-pressed={item.enabled}
-          title={item.enabled ? 'Visible: click to hide' : 'Hidden: click to show'}
+          disabled={onAir}
+          title={onAir ? `${item.enabled ? 'Visible' : 'Hidden'}. ${onAirTitle}` : item.enabled ? 'Visible: click to hide' : 'Hidden: click to show'}
         >
           {item.enabled ? <EyeIcon /> : <EyeOffIcon />}
         </button>
@@ -40,7 +43,7 @@ export function ItemRow({ row, ui }: { row: Row; ui: ScenesPanelState }) {
         >
           {item.locked ? <LockIcon /> : <UnlockIcon />}
         </button>
-        <OrderButtons container={container} itemId={item.id} locked={item.locked} />
+        <OrderButtons container={container} itemId={item.id} locked={item.locked || onAir} />
         <button
           className={`icon-button ${editing ? 'is-active' : 'is-off'}`}
           onClick={() => ui.toggleEditor(key)}
@@ -49,12 +52,17 @@ export function ItemRow({ row, ui }: { row: Row; ui: ScenesPanelState }) {
         >
           <TransformIcon />
         </button>
-        <button className="icon-button icon-button--danger is-off" onClick={() => ui.setConfirming(`item:${key}`)} title="Remove or delete…">
+        <button
+          className="icon-button icon-button--danger is-off"
+          onClick={() => ui.setConfirming(`item:${key}`)}
+          disabled={onAir}
+          title={onAir ? onAirTitle : 'Remove or delete…'}
+        >
           <TrashIcon />
         </button>
       </div>
 
-      {ui.confirming === `item:${key}` && (
+      {ui.confirming === `item:${key}` && !onAir && (
         <div style={indent(depth)}>
           <ItemDeleteConfirm row={row} onDone={() => ui.setConfirming(null)} />
         </div>

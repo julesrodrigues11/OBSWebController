@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useConnection } from './connection'
 import { useScenes, type SceneItem } from './scenes'
+import { protectedContainers, useShowMode } from './showMode'
 
 /** Pure version of useOnAirSources, for testing. */
 export function onAirSources(programScene: string | null, items: Record<string, SceneItem[]>): Set<string> {
@@ -56,4 +57,22 @@ export function containersOf(sourceName: string, items: Record<string, SceneItem
   return Object.entries(items)
     .filter(([, list]) => list.some((it) => it.sourceName === sourceName))
     .map(([container]) => container)
+}
+
+/**
+ * What show mode protects right now. `sceneLocked(container)` is true for the live scene and
+ * everything nested in it; `sourceLocked(name)` for sources visible on air. Both are false
+ * when show mode is off.
+ */
+export function useProtection() {
+  const on = useShowMode((s) => s.on)
+  const programScene = useConnection((s) => s.programScene)
+  const items = useScenes((s) => s.items)
+  const onAir = useOnAirSources()
+  const containers = useMemo(() => (on ? protectedContainers(programScene, items) : new Set<string>()), [on, programScene, items])
+  return {
+    on,
+    sceneLocked: (container: string) => containers.has(container),
+    sourceLocked: (name: string) => on && onAir.has(name),
+  }
 }

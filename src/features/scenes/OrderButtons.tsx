@@ -13,7 +13,7 @@ export function OrderButtons({ container, itemId, locked = false }: { container:
   const move = (to: 'top' | 'up' | 'down' | 'bottom') => void moveItem(container, itemId, to)
 
   return (
-    <span className="item__order" aria-label="Order" title={locked ? 'Locked: unlock to change its order' : undefined}>
+    <span className="item__order" aria-label="Order" title={locked ? 'Locked or on air: order can’t be changed' : undefined}>
       <button className="order-button" disabled={isTop} onClick={() => move('top')} title="Move to top (drawn above everything)">⤒</button>
       <button className="order-button" disabled={isTop} onClick={() => move('up')} title="Move up">▲</button>
       <button className="order-button" disabled={isBottom} onClick={() => move('down')} title="Move down">▼</button>

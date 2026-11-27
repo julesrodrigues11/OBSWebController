@@ -3,6 +3,7 @@ import { obs, errorText } from '../obs/client'
 import { useConnection } from './connection'
 import type { Transform } from '../obs/transform'
 import { useUi } from './ui'
+import { SHOW_MODE_BLOCKED, protectedContainers, useShowMode } from './showMode'
 
 /** A scene item. Visibility and lock belong to the item (per scene), not to the source. */
 export interface SceneItem {
@@ -137,6 +138,17 @@ export const useScenes = create<ScenesState>()((set, get) => {
     }
   }
 
+  /**
+   * Show mode protects the live scene and what's nested in it. The UI disables those controls;
+   * this also stops a change that was already under way (e.g. a field committed on blur).
+   */
+  function protectedByShowMode(container: string) {
+    if (!useShowMode.getState().on) return false
+    if (!protectedContainers(useConnection.getState().programScene, get().items).has(container)) return false
+    set({ error: SHOW_MODE_BLOCKED })
+    return true
+  }
+
   /** Locked items keep their position, size and order (also guarded here, not just in the UI). */
   function isLocked(container: string, id: number) {
     return get().items[container]?.find((it) => it.id === id)?.locked ?? false
@@ -182,6 +194,7 @@ export const useScenes = create<ScenesState>()((set, get) => {
     transforms: {},
 
     setEnabled: async (container, itemId, enabled) => {
+      if (protectedByShowMode(container)) return
       patchItem(container, itemId, { enabled }) // optimistic
       try {
         await obs.call('SetSceneItemEnabled', { sceneName: container, sceneItemId: itemId, sceneItemEnabled: enabled })
@@ -204,6 +217,7 @@ export const useScenes = create<ScenesState>()((set, get) => {
     clearError: () => set({ error: null }),
 
     removeItem: async (container, itemId) => {
+      if (protectedByShowMode(container)) return
       try {
         await obs.call('RemoveSceneItem', { sceneName: container, sceneItemId: itemId })
         // The list refreshes via the SceneItemRemoved event.
@@ -216,7 +230,7 @@ export const useScenes = create<ScenesState>()((set, get) => {
       const list = get().items[container]
       if (!list) return
       const from = list.findIndex((it) => it.id === itemId)
-      if (from < 0 || list[from].locked) return
+      if (from < 0 || list[from].locked || protectedByShowMode(container)) return
       const last = list.length - 1
       const target = to === 'top' ? 0 : to === 'bottom' ? last : to === 'up' ? from - 1 : from + 1
       if (target < 0 || target > last || target === from) return
@@ -237,6 +251,7 @@ export const useScenes = create<ScenesState>()((set, get) => {
     },
 
     addExisting: async (sceneName, sourceName, enabled) => {
+      if (protectedByShowMode(sceneName)) return SHOW_MODE_BLOCKED
       try {
         await obs.call('CreateSceneItem', { sceneName, sourceName, sceneItemEnabled: enabled })
         return null // list refreshes via SceneItemCreated
@@ -255,6 +270,7 @@ export const useScenes = create<ScenesState>()((set, get) => {
     },
 
     renameScene: async (oldName, newName) => {
+      if (protectedByShowMode(oldName)) return SHOW_MODE_BLOCKED
       try {
         await obs.call('SetSceneName', { sceneName: oldName, newSceneName: newName })
         // Keep the Sources panel on this scene if it was showing it.
@@ -267,6 +283,7 @@ export const useScenes = create<ScenesState>()((set, get) => {
     },
 
     deleteScene: async (sceneName) => {
+      if (protectedByShowMode(sceneName)) return
       try {
         await obs.call('RemoveScene', { sceneName })
         // Scene list refreshes via SceneListChanged.
@@ -285,6 +302,7 @@ export const useScenes = create<ScenesState>()((set, get) => {
     },
 
     setTransform: async (container, itemId, patch) => {
+      if (protectedByShowMode(container)) return
       if (isLocked(container, itemId)) {
         set({ error: 'That item is locked: unlock it to change its position, size or crop.' })
         return

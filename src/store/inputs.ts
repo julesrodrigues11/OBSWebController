@@ -1,6 +1,9 @@
 import { create } from 'zustand'
 import { obs, errorText, labelled } from '../obs/client'
 import { useConnection } from './connection'
+import { onAirSources } from './live'
+import { useScenes } from './scenes'
+import { SHOW_MODE_BLOCKED, protectedContainers, useShowMode } from './showMode'
 
 export type Category = 'browser' | 'media' | 'image' | 'slideshow' | 'text'
 export type Settings = Record<string, unknown>
@@ -112,6 +115,18 @@ async function fetchMediaState(name: string): Promise<string> {
   return res.mediaState
 }
 
+/** Show mode: sources visible on air can't be changed (see store/showMode.ts). */
+function onAirAndProtected(inputName: string) {
+  if (!useShowMode.getState().on) return false
+  return onAirSources(useConnection.getState().programScene, useScenes.getState().items).has(inputName)
+}
+
+/** Show mode: nothing can be added to the live scene or anything nested in it. */
+function sceneProtected(sceneName: string) {
+  if (!useShowMode.getState().on) return false
+  return protectedContainers(useConnection.getState().programScene, useScenes.getState().items).has(sceneName)
+}
+
 export const useInputs = create<InputsState>()((set, get) => {
   async function loadAll() {
     const token = ++loadToken
@@ -206,6 +221,11 @@ export const useInputs = create<InputsState>()((set, get) => {
     error: null,
 
     setSettings: async (inputName, patch) => {
+      if (onAirAndProtected(inputName)) {
+        set({ error: SHOW_MODE_BLOCKED })
+        await refreshOne(inputName) // put back what OBS has, in case a field showed the change
+        return
+      }
       const prev = get().settings[inputName]
       if (prev) set({ settings: { ...get().settings, [inputName]: { ...prev, ...patch } } }) // optimistic
       try {
@@ -218,6 +238,7 @@ export const useInputs = create<InputsState>()((set, get) => {
     },
 
     pressButton: async (inputName, propertyName) => {
+      if (onAirAndProtected(inputName)) return set({ error: SHOW_MODE_BLOCKED })
       try {
         await obs.call('PressInputPropertiesButton', { inputName, propertyName })
       } catch (e) {
@@ -226,6 +247,7 @@ export const useInputs = create<InputsState>()((set, get) => {
     },
 
     mediaAction: async (inputName, action) => {
+      if (onAirAndProtected(inputName)) return set({ error: SHOW_MODE_BLOCKED })
       try {
         await obs.call('TriggerMediaInputAction', { inputName, mediaAction: MediaAction[action] })
       } catch (e) {
@@ -237,6 +259,7 @@ export const useInputs = create<InputsState>()((set, get) => {
     clearError: () => set({ error: null }),
 
     createInput: async (sceneName, inputName, category, settings, enabled) => {
+      if (sceneProtected(sceneName)) return SHOW_MODE_BLOCKED
       try {
         if (!kindListCache) {
           const res = await obs.call('GetInputKindList', { unversioned: false })
@@ -252,6 +275,7 @@ export const useInputs = create<InputsState>()((set, get) => {
     },
 
     deleteInput: async (inputName) => {
+      if (onAirAndProtected(inputName)) return set({ error: SHOW_MODE_BLOCKED })
       try {
         await obs.call('RemoveInput', { inputName })
         // Lists refresh via InputRemoved / SceneItemRemoved.

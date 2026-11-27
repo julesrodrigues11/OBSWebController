@@ -4,6 +4,7 @@ import { kindLabel } from '../../obs/kinds'
 import type { Settings } from '../../store/inputs'
 import { TrashIcon } from '../../components/icons'
 import { DeleteSourceConfirm } from './SourceRow'
+import { useProtection } from '../../store/live'
 
 /**
  * A source type without an editor yet: shows its kind and, on demand, the raw settings
@@ -13,6 +14,7 @@ export function OtherRow({ name, kind, live, dim }: { name: string; kind: string
   const [raw, setRaw] = useState<Settings | string | null>(null)
   const [confirming, setConfirming] = useState(false)
   const open = raw !== null
+  const locked = useProtection().sourceLocked(name) // show mode: visible on air
 
   async function toggle() {
     if (open) return setRaw(null)
@@ -39,11 +41,16 @@ export function OtherRow({ name, kind, live, dim }: { name: string; kind: string
         <button className={`chip ${open ? 'is-active' : ''}`} onClick={() => void toggle()} title="Show this source's stored settings (values left at defaults are omitted)">
           {'{ }'}
         </button>
-        <button className="icon-button icon-button--danger is-off" onClick={() => setConfirming(true)} title="Delete this source…">
+        <button
+          className="icon-button icon-button--danger is-off"
+          onClick={() => setConfirming(true)}
+          disabled={locked}
+          title={locked ? 'Show mode: this source is on air and protected' : 'Delete this source…'}
+        >
           <TrashIcon />
         </button>
       </div>
-      {confirming && <DeleteSourceConfirm name={name} onDone={() => setConfirming(false)} />}
+      {confirming && !locked && <DeleteSourceConfirm name={name} onDone={() => setConfirming(false)} />}
       {open && (
         <div className="srow__panel">
           <pre className="raw">{typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2)}</pre>
